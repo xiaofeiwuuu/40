@@ -168,21 +168,6 @@
     transform: scaleX(1) !important;
   }
 
-  .marquee-track {
-    animation: none !important;
-    transform: none !important;
-  }
-
-  .marquee-row {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .calendar-wall {
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
-  }
-
   .inheritance-line path {
     stroke-dashoffset: 0 !important;
   }

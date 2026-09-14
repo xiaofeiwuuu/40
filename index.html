@@ -68,7 +68,12 @@
 
       <section class="screen screen-calendars" id="s2" data-screen="2" aria-labelledby="s2Title">
         <div class="section-index"><span>01</span> 打开时间</div>
-        <div class="calendar-wall archive-reveal" id="calendarWall" data-hook="calendar-wall" aria-label="1987年至2026年共40本台历封面，滚动展示，点击任意一张可暂停并放大查看"></div>
+        <div class="calendar-flipbook archive-reveal" id="calendarFlipbook" data-hook="calendar-flipbook" aria-label="1987年至2026年共40本台历封面，可左右滑动逐本查看，双击或点展开选择浏览全部"></div>
+        <div class="calendar-expand" id="calendarExpand" aria-label="全部40本台历封面，左右滑动浏览，点击选择这一本" hidden></div>
+        <div class="stack-hint-row archive-reveal">
+          <p class="stack-hint" id="stackHint">左右滑动看上一本/下一本，或展开浏览全部</p>
+          <button class="stack-expand-btn" id="stackExpandBtn" type="button" aria-pressed="false">展开选择</button>
+        </div>
         <div class="calendar-count archive-reveal"><strong>40</strong><span>本<br>台历</span></div>
         <div class="scene-copy scene-copy-center">
           <p class="eyebrow archive-reveal">1987—2026</p>

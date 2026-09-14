@@ -102,11 +102,12 @@
 
   function animateScreen(screen) {
     var gsap = root.gsap;
+    var id = screen.id;
+
     if (!gsap || reducedMotion) {
       return;
     }
 
-    var id = screen.id;
     var elements = getRevealElements(screen);
     if (elements.length) {
       gsap.fromTo(elements, {

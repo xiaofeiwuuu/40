@@ -199,72 +199,319 @@
     });
   }
 
-  function buildCalendarTile(year, isDuplicate) {
-    var tile = root.document.createElement('button');
-    var image = root.document.createElement('img');
-    var label = root.document.createElement('span');
+  var STACK_DEPTH = 3;
+  var STACK_POSITIONS = [
+    { x: 0, y: 0, r: 0 },
+    { x: 14, y: -10, r: 7 },
+    { x: -16, y: -16, r: -9 }
+  ];
+  var EXPAND_COPIES = 3;
+  var stackIndex = 0;
+  var stackCards = [];
+  var stackDraggableInstance = null;
+  var stackReducedMotion = false;
+  var expandOpen = false;
+  var expandBuilt = false;
+  var expandWrapTimer = null;
 
-    tile.type = 'button';
-    tile.className = 'calendar-tile';
-    tile.dataset.openImage = 'assets/images/calendars/' + year + '.jpg';
-    tile.dataset.alt = year + '年台历封面';
-    if (isDuplicate) {
-      // The row is doubled so the marquee can loop seamlessly; the second
-      // copy is a visual echo only, so keep it out of tab order and a11y tree.
-      tile.setAttribute('aria-hidden', 'true');
-      tile.tabIndex = -1;
+  function setStackCardYear(card, year) {
+    var image = card.querySelector('img');
+    var label = card.querySelector('.flip-year');
+    var alt = year + '年台历封面';
+    image.src = 'assets/images/calendars/' + year + '.jpg';
+    image.alt = alt;
+    if (label) {
+      label.textContent = String(year);
     }
-
-    image.dataset.src = 'assets/images/calendars/' + year + '.jpg';
-    image.alt = year + '年台历封面';
-    image.width = 240;
-    image.height = 320;
-    image.decoding = 'async';
-    label.textContent = String(year);
-
-    tile.appendChild(image);
-    tile.appendChild(label);
-    return tile;
+    card.dataset.year = String(year);
+    card.setAttribute('aria-label', '当前展示' + alt + '，左右滑动查看上一本/下一本，双击展开选择');
   }
 
-  function buildCalendarWall() {
-    var wall = byId('calendarWall');
-    if (!wall || wall.children.length) {
+  function layoutStackCard(card, depth, animate) {
+    var gsap = root.gsap;
+    var pos = STACK_POSITIONS[depth] || STACK_POSITIONS[STACK_POSITIONS.length - 1];
+    var visible = depth < STACK_DEPTH && Boolean(content.calendarYears[stackIndex + depth]);
+    card.style.zIndex = String(STACK_DEPTH - depth);
+    card.style.pointerEvents = depth === 0 ? 'auto' : 'none';
+    card.style.cursor = depth === 0 ? 'grab' : 'default';
+    var state = { x: pos.x, y: pos.y, rotation: pos.r, scale: 1 - depth * .03, opacity: visible ? 1 : 0 };
+    if (gsap && !stackReducedMotion && animate) {
+      gsap.to(card, Object.assign({ duration: .32, ease: 'power2.out' }, state));
+    } else if (gsap) {
+      gsap.set(card, state);
+    } else {
+      card.style.transform = 'translate(' + state.x + 'px,' + state.y + 'px) rotate(' + state.rotation + 'deg) scale(' + state.scale + ')';
+      card.style.opacity = String(state.opacity);
+    }
+  }
+
+  function snapFrontBack() {
+    var gsap = root.gsap;
+    if (gsap) {
+      gsap.to(stackCards[0], { x: 0, y: 0, rotation: 0, duration: .32, ease: 'back.out(1.6)' });
+    }
+  }
+
+  function enableFrontDrag() {
+    var Draggable = root.Draggable;
+    var gsap = root.gsap;
+    var front = stackCards[0];
+    if (stackDraggableInstance) {
+      stackDraggableInstance.kill();
+      stackDraggableInstance = null;
+    }
+    if (!Draggable || !front || expandOpen) {
+      return;
+    }
+    var instances = Draggable.create(front, {
+      type: 'x,y',
+      minimumMovement: 6,
+      onDragStart: function markDragged() {
+        front.dataset.wasDragged = 'true';
+      },
+      onDrag: function tilt() {
+        if (gsap) {
+          gsap.set(front, { rotation: this.x / 16 });
+        }
+      },
+      onDragEnd: function release() {
+        var threshold = 68;
+        if (Math.abs(this.x) > threshold || Math.abs(this.y) > threshold) {
+          stepStack(this.x < 0 ? -1 : 1);
+        } else {
+          snapFrontBack();
+        }
+        setTimeout(function allowClickAgain() { delete front.dataset.wasDragged; }, 60);
+      }
+    });
+    stackDraggableInstance = instances && instances[0];
+  }
+
+  function updateStackExpandButton() {
+    var button = byId('stackExpandBtn');
+    if (!button) {
+      return;
+    }
+    button.textContent = expandOpen ? '收起' : '展开选择';
+    button.setAttribute('aria-pressed', expandOpen ? 'true' : 'false');
+  }
+
+  function buildCalendarExpand() {
+    var list = byId('calendarExpand');
+    if (!list || expandBuilt) {
+      return;
+    }
+    var years = content.calendarYears;
+    for (var copy = 0; copy < EXPAND_COPIES; copy += 1) {
+      years.forEach(function addItem(year) {
+        var item = root.document.createElement('button');
+        var image = root.document.createElement('img');
+        var label = root.document.createElement('span');
+        item.type = 'button';
+        item.className = 'expand-item';
+        image.width = 200;
+        image.height = 267;
+        image.decoding = 'async';
+        label.className = 'flip-year';
+        item.appendChild(image);
+        item.appendChild(label);
+        setStackCardYear(item, year);
+        item.setAttribute('aria-label', year + '年台历封面，点击选择这一本');
+        list.appendChild(item);
+      });
+    }
+    expandBuilt = true;
+  }
+
+  function handleExpandScroll() {
+    var list = byId('calendarExpand');
+    if (!list || expandWrapTimer) {
+      return;
+    }
+    expandWrapTimer = root.requestAnimationFrame(function checkWrap() {
+      expandWrapTimer = null;
+      var copyWidth = list.scrollWidth / EXPAND_COPIES;
+      if (list.scrollLeft < copyWidth * .5) {
+        list.scrollLeft += copyWidth;
+      } else if (list.scrollLeft > copyWidth * 1.5) {
+        list.scrollLeft -= copyWidth;
+      }
+    });
+  }
+
+  function openCalendarExpand() {
+    var flipbook = byId('calendarFlipbook');
+    var list = byId('calendarExpand');
+    if (!list || !flipbook || expandOpen) {
+      return;
+    }
+    expandOpen = true;
+    updateStackExpandButton();
+    if (stackDraggableInstance) {
+      stackDraggableInstance.kill();
+      stackDraggableInstance = null;
+    }
+    flipbook.hidden = true;
+    list.hidden = false;
+    buildCalendarExpand();
+
+    var years = content.calendarYears;
+    var firstItem = list.querySelector('.expand-item');
+    if (firstItem) {
+      var itemSpan = firstItem.getBoundingClientRect().width + 8;
+      list.scrollLeft = (years.length + stackIndex) * itemSpan - (list.clientWidth - itemSpan) / 2;
+    }
+  }
+
+  function closeCalendarExpand(selectedYear) {
+    var flipbook = byId('calendarFlipbook');
+    var list = byId('calendarExpand');
+    if (!expandOpen) {
+      return;
+    }
+    expandOpen = false;
+    updateStackExpandButton();
+    if (list) {
+      list.hidden = true;
+    }
+    if (flipbook) {
+      flipbook.hidden = false;
+    }
+    if (selectedYear != null) {
+      jumpStackToYear(selectedYear);
+    }
+    enableFrontDrag();
+  }
+
+  function toggleCalendarExpand() {
+    if (expandOpen) {
+      closeCalendarExpand();
+    } else {
+      openCalendarExpand();
+    }
+  }
+
+  function jumpStackToYear(year) {
+    var years = content.calendarYears;
+    var index = years.indexOf(year);
+    if (index < 0 || index === stackIndex) {
+      return;
+    }
+    stackIndex = index;
+    stackCards.forEach(function updateCard(card, depth) {
+      var cardYear = years[stackIndex + depth];
+      if (cardYear) {
+        setStackCardYear(card, cardYear);
+      }
+      layoutStackCard(card, depth, false);
+    });
+    root.document.dispatchEvent(new root.CustomEvent('calendar:flip'));
+  }
+
+  function stepStackForward(swipeDir, front) {
+    var gsap = root.gsap;
+    var recycle = function afterExit() {
+      stackCards.push(stackCards.shift());
+      var backYear = content.calendarYears[stackIndex + STACK_DEPTH - 1];
+      if (backYear) {
+        setStackCardYear(stackCards[STACK_DEPTH - 1], backYear);
+      }
+      stackCards.forEach(function relayout(card, depth) { layoutStackCard(card, depth, true); });
+      enableFrontDrag();
+    };
+
+    if (gsap && !stackReducedMotion) {
+      gsap.to(front, {
+        x: swipeDir * 420,
+        y: -30,
+        rotation: swipeDir * 22,
+        opacity: 0,
+        duration: .26,
+        ease: 'power1.in',
+        onComplete: recycle
+      });
+    } else {
+      recycle();
+    }
+  }
+
+  function stepStackBackward(swipeDir) {
+    var gsap = root.gsap;
+    // The dragged card isn't discarded - it just settles one layer back into the
+    // pile, while the previous year's card is pulled from the back of the pool
+    // and flies in from off-screen to take the front position.
+    stackCards.unshift(stackCards.pop());
+    var incoming = stackCards[0];
+    setStackCardYear(incoming, content.calendarYears[stackIndex]);
+    if (gsap) {
+      gsap.set(incoming, { x: swipeDir * 420, y: -30, rotation: swipeDir * 22, opacity: 0 });
+    }
+    stackCards.forEach(function relayout(card, depth) { layoutStackCard(card, depth, true); });
+    enableFrontDrag();
+  }
+
+  function stepStack(swipeDir) {
+    var front = stackCards[0];
+    var indexStep = swipeDir < 0 ? 1 : -1;
+    var nextIndex = stackIndex + indexStep;
+    if (!front || nextIndex < 0 || nextIndex >= content.calendarYears.length) {
+      snapFrontBack();
+      return;
+    }
+    if (stackDraggableInstance) {
+      stackDraggableInstance.kill();
+      stackDraggableInstance = null;
+    }
+    root.document.dispatchEvent(new root.CustomEvent('calendar:flip'));
+    stackIndex = nextIndex;
+
+    if (indexStep > 0) {
+      stepStackForward(swipeDir, front);
+    } else {
+      stepStackBackward(swipeDir);
+    }
+  }
+
+  function buildCalendarStack() {
+    var book = byId('calendarFlipbook');
+    if (!book || book.children.length) {
       return;
     }
 
-    var rowCount = 4;
-    var perRow = Math.ceil(content.calendarYears.length / rowCount);
+    stackReducedMotion = Boolean(root.matchMedia) && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    stackIndex = 0;
 
-    for (var rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
-      var years = content.calendarYears.slice(rowIndex * perRow, rowIndex * perRow + perRow);
-      var row = root.document.createElement('div');
-      var track = root.document.createElement('div');
+    for (var depth = 0; depth < STACK_DEPTH; depth += 1) {
+      var card = root.document.createElement('button');
+      var image = root.document.createElement('img');
+      var label = root.document.createElement('span');
 
-      row.className = 'marquee-row';
-      row.dataset.dir = rowIndex % 2 === 0 ? 'ltr' : 'rtl';
-      track.className = 'marquee-track';
+      card.type = 'button';
+      card.className = 'stack-card';
+      image.width = 240;
+      image.height = 320;
+      image.decoding = 'async';
+      label.className = 'flip-year';
 
-      years.forEach(function addOriginal(year) { track.appendChild(buildCalendarTile(year, false)); });
-      years.forEach(function addEcho(year) { track.appendChild(buildCalendarTile(year, true)); });
+      card.appendChild(image);
+      card.appendChild(label);
+      book.appendChild(card);
+      stackCards.push(card);
 
-      row.appendChild(track);
-      wall.appendChild(row);
+      if (content.calendarYears[depth]) {
+        setStackCardYear(card, content.calendarYears[depth]);
+      }
+      layoutStackCard(card, depth, false);
     }
+
+    enableFrontDrag();
   }
 
-  function pauseCalendarWall() {
-    var wall = byId('calendarWall');
-    if (wall) {
-      wall.classList.add('is-paused');
-    }
-  }
-
-  function resumeCalendarWall() {
-    var wall = byId('calendarWall');
-    if (wall) {
-      wall.classList.remove('is-paused');
-    }
+  function preloadCalendarImages() {
+    content.calendarYears.forEach(function preload(year) {
+      var probe = new Image();
+      probe.src = 'assets/images/calendars/' + year + '.jpg';
+    });
   }
 
   function buildLifeCards() {
@@ -508,11 +755,59 @@
       attemptOpeningSound();
     });
 
+    root.document.addEventListener('calendar:flip', function onCalendarFlip() {
+      playCue('page');
+    });
+
+    var flipbook = byId('calendarFlipbook');
+    if (flipbook) {
+      // Native dblclick is unreliable on touch - many mobile browsers only
+      // synthesize it when pinch-zoom is enabled, which this page disables
+      // via the viewport meta tag. Detect the double-tap ourselves instead.
+      var lastTapTime = 0;
+      var lastTapX = 0;
+      var lastTapY = 0;
+      flipbook.addEventListener('pointerup', function onFlipbookTap(event) {
+        var draggedCard = event.target.closest('.stack-card');
+        if (draggedCard && draggedCard.dataset.wasDragged === 'true') {
+          return;
+        }
+        var now = Date.now();
+        var dx = event.clientX - lastTapX;
+        var dy = event.clientY - lastTapY;
+        var isDoubleTap = (now - lastTapTime) < 400 && (dx * dx + dy * dy) < 1600;
+        lastTapTime = isDoubleTap ? 0 : now;
+        lastTapX = event.clientX;
+        lastTapY = event.clientY;
+        if (isDoubleTap) {
+          event.preventDefault();
+          unlockAudioContext();
+          playCue('page');
+          toggleCalendarExpand();
+        }
+      });
+    }
+
+    var stackExpandButton = byId('stackExpandBtn');
+    if (stackExpandButton) {
+      stackExpandButton.addEventListener('click', function onExpandClick() {
+        unlockAudioContext();
+        playCue('page');
+        toggleCalendarExpand();
+      });
+    }
+
+    var calendarExpandList = byId('calendarExpand');
+    if (calendarExpandList) {
+      calendarExpandList.addEventListener('scroll', handleExpandScroll, { passive: true });
+    }
+
     root.document.addEventListener('click', function handleAction(event) {
       var goButton = event.target.closest('[data-go]');
       var imageButton = event.target.closest('[data-open-image]');
       var videoButton = event.target.closest('[data-open-video]');
       var quizButton = event.target.closest('[data-open-quiz]');
+      var expandItem = event.target.closest('.expand-item');
 
       if (goButton) {
         unlockAudioContext();
@@ -520,15 +815,14 @@
         goTo(goButton.dataset.go);
         return;
       }
+      if (expandItem) {
+        unlockAudioContext();
+        playCue('page');
+        closeCalendarExpand(Number(expandItem.dataset.year));
+        return;
+      }
       if (imageButton) {
-        if (imageButton.closest('#calendarWall')) {
-          unlockAudioContext();
-          playCue('page');
-          pauseCalendarWall();
-          media.openImage(imageButton.dataset.openImage, imageButton.dataset.alt, imageButton, resumeCalendarWall);
-        } else {
-          media.openImage(imageButton.dataset.openImage, imageButton.dataset.alt, imageButton);
-        }
+        media.openImage(imageButton.dataset.openImage, imageButton.dataset.alt, imageButton);
         return;
       }
       if (videoButton) {
@@ -570,10 +864,6 @@
     if (screenId !== 's1' && openingAudio && !openingAudio.paused) {
       openingAudio.pause();
     }
-    var calendarWall = byId('calendarWall');
-    if (calendarWall) {
-      calendarWall.classList.toggle('is-offscreen', screenId !== 's2');
-    }
     if (screenId === 's9' && puzzleController && !puzzleTimerStarted) {
       puzzleTimerStarted = true;
       puzzleController.startSkipTimer();
@@ -584,7 +874,8 @@
     if (experienceBuilt) {
       return;
     }
-    buildCalendarWall();
+    buildCalendarStack();
+    preloadCalendarImages();
     buildLifeCards();
     buildSpendingChart();
     setupLifeCarousel();
