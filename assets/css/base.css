@@ -1,3 +1,12 @@
+@font-face {
+  font-family: "PenDiary";
+  src: url("../fonts/ZhiMangXing-s1.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+3000-303F, U+FF00-FFEF, U+4E00-9FFF;
+}
+
 :root {
   --paper: #e7d5ad;
   --paper-light: #f5ead1;

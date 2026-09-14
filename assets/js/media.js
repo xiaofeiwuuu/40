@@ -10,6 +10,7 @@
   var title = null;
   var lastTrigger = null;
   var initialized = false;
+  var onCloseCallback = null;
 
   function pauseAll() {
     if (!root.document) {
@@ -57,9 +58,10 @@
     return true;
   }
 
-  function openImage(path, alt, trigger) {
+  function openImage(path, alt, trigger, onClose) {
     pauseAll();
     clear();
+    onCloseCallback = typeof onClose === 'function' ? onClose : null;
     if (!show(trigger, '台历原稿')) {
       return;
     }
@@ -84,6 +86,7 @@
   function openVideo(path, poster, trigger) {
     pauseAll();
     clear();
+    onCloseCallback = null;
     if (!show(trigger, '采访影像')) {
       return;
     }
@@ -125,6 +128,11 @@
       lastTrigger.focus({ preventScroll: true });
     }
     lastTrigger = null;
+    if (onCloseCallback) {
+      var callback = onCloseCallback;
+      onCloseCallback = null;
+      callback();
+    }
   }
 
   function handleKeydown(event) {

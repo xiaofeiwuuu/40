@@ -45,8 +45,8 @@
       <section class="screen screen-opening" id="s1" data-screen="1" aria-labelledby="s1Title">
         <div class="folio-corners" aria-hidden="true"></div>
         <div class="s1-date archive-reveal">2026.09.28</div>
-        <div class="pen-mark archive-reveal" aria-hidden="true">
-          <svg viewBox="0 0 90 180"><path d="M45 3 73 95 45 151 17 95 45 3Z"/><path d="m17 95 28 14 28-14M45 109v42"/><circle cx="45" cy="88" r="6"/><path d="M45 151c-8 8-12 15-12 25h24c0-10-4-17-12-25Z"/></svg>
+        <div class="opening-portrait archive-reveal">
+          <img data-src="assets/images/donation/03.jpg" alt="陈治国伏案整理他记录了40年的台历" width="640" height="640">
         </div>
         <div class="opening-copy">
           <p class="eyebrow archive-reveal">一份献给时间的礼物</p>
@@ -63,11 +63,12 @@
           <span>翻开这份时间档案</span><i aria-hidden="true">↓</i>
         </button>
         <p class="scroll-hint" aria-hidden="true">向上滑动</p>
+        <audio id="openingPenSound" preload="auto" aria-hidden="true" src="assets/audio/s1-pen-scratch.mp3"></audio>
       </section>
 
       <section class="screen screen-calendars" id="s2" data-screen="2" aria-labelledby="s2Title">
         <div class="section-index"><span>01</span> 打开时间</div>
-        <div class="calendar-stage" id="calendarStack" data-hook="calendar-stack" aria-label="1987年至2026年共40本台历封面"></div>
+        <div class="calendar-wall archive-reveal" id="calendarWall" data-hook="calendar-wall" aria-label="1987年至2026年共40本台历封面，滚动展示，点击任意一张可暂停并放大查看"></div>
         <div class="calendar-count archive-reveal"><strong>40</strong><span>本<br>台历</span></div>
         <div class="scene-copy scene-copy-center">
           <p class="eyebrow archive-reveal">1987—2026</p>

@@ -65,21 +65,25 @@
   }
 
   function unlockAudioContext() {
-    if (audioContext) {
-      if (audioContext.state === 'suspended') {
-        audioContext.resume().catch(function ignoreResumeError() {});
+    if (!audioContext) {
+      var AudioContext = root.AudioContext || root.webkitAudioContext;
+      if (!AudioContext) {
+        return null;
       }
-      return audioContext;
+      try {
+        audioContext = new AudioContext();
+      } catch (error) {
+        audioContext = null;
+        return null;
+      }
     }
 
-    var AudioContext = root.AudioContext || root.webkitAudioContext;
-    if (!AudioContext) {
-      return null;
-    }
-    try {
-      audioContext = new AudioContext();
-    } catch (error) {
-      audioContext = null;
+    // iOS Safari routinely hands back a context that is still 'suspended'
+    // even when the constructor ran inside a genuine gesture handler - it
+    // has to be resumed explicitly, in that same gesture, every time we see
+    // it suspended (construction included), or it never unlocks at all.
+    if (audioContext.state === 'suspended') {
+      audioContext.resume().catch(function ignoreResumeError() {});
     }
     return audioContext;
   }
@@ -107,6 +111,50 @@
     gain.connect(context.destination);
     oscillator.start(now);
     oscillator.stop(now + .15);
+  }
+
+  var openingSoundReadyAt = 0;
+  var openingSoundWindowMs = 0;
+  var openingSoundStarted = false;
+  var openingSoundPrimed = false;
+
+  function primeOpeningSound() {
+    var audio = byId('openingPenSound');
+    if (!audio || openingSoundPrimed) {
+      return;
+    }
+    // Media elements remember, per element, that a real user gesture once
+    // allowed them to play - a play()+immediate pause() inside the first
+    // gesture "banks" that permission so a later un-gestured play() (once
+    // the ink-schedule fires or the reveal is still running) is allowed.
+    var primer = audio.play();
+    if (primer && typeof primer.then === 'function') {
+      primer.then(function pauseAfterPrime() {
+        audio.pause();
+        audio.currentTime = 0;
+        openingSoundPrimed = true;
+        attemptOpeningSound();
+      }).catch(function ignorePrimeFailure() {});
+    }
+  }
+
+  function attemptOpeningSound() {
+    var audio = byId('openingPenSound');
+    if (!audio || cueMuted || openingSoundStarted) {
+      return;
+    }
+    if (openingSoundReadyAt && Date.now() - openingSoundReadyAt > openingSoundWindowMs + 600) {
+      // The handwriting has already finished settling - starting the clip
+      // now would just be a stray noise with nothing on screen to match.
+      return;
+    }
+    audio.currentTime = 0;
+    var playback = audio.play();
+    if (playback && typeof playback.catch === 'function') {
+      playback.then(function markStarted() { openingSoundStarted = true; }).catch(function ignoreBlocked() {});
+    } else {
+      openingSoundStarted = true;
+    }
   }
 
   function formatTime(seconds) {
@@ -151,35 +199,72 @@
     });
   }
 
-  function buildCalendars() {
-    var stage = byId('calendarStack');
-    if (!stage || stage.children.length) {
+  function buildCalendarTile(year, isDuplicate) {
+    var tile = root.document.createElement('button');
+    var image = root.document.createElement('img');
+    var label = root.document.createElement('span');
+
+    tile.type = 'button';
+    tile.className = 'calendar-tile';
+    tile.dataset.openImage = 'assets/images/calendars/' + year + '.jpg';
+    tile.dataset.alt = year + '年台历封面';
+    if (isDuplicate) {
+      // The row is doubled so the marquee can loop seamlessly; the second
+      // copy is a visual echo only, so keep it out of tab order and a11y tree.
+      tile.setAttribute('aria-hidden', 'true');
+      tile.tabIndex = -1;
+    }
+
+    image.dataset.src = 'assets/images/calendars/' + year + '.jpg';
+    image.alt = year + '年台历封面';
+    image.width = 240;
+    image.height = 320;
+    image.decoding = 'async';
+    label.textContent = String(year);
+
+    tile.appendChild(image);
+    tile.appendChild(label);
+    return tile;
+  }
+
+  function buildCalendarWall() {
+    var wall = byId('calendarWall');
+    if (!wall || wall.children.length) {
       return;
     }
 
-    content.calendarYears.forEach(function addCalendar(year, index) {
-      var row = Math.floor(index / 10);
-      var column = index % 10;
-      var card = root.document.createElement('div');
-      var image = root.document.createElement('img');
-      var label = root.document.createElement('span');
-      var x = (column - 4.5) * 17 + (row % 2 ? 8 : -5);
-      var y = (row - 1.6) * 42 + (column % 3) * 3;
-      var rotation = (column - 4.5) * 2.2 + (row - 1.5) * 1.7;
+    var rowCount = 4;
+    var perRow = Math.ceil(content.calendarYears.length / rowCount);
 
-      card.className = 'calendar-card';
-      card.style.zIndex = String(index + 1);
-      card.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rotation + 'deg)';
-      image.dataset.src = 'assets/images/calendars/' + year + '.jpg';
-      image.alt = year + '年台历封面';
-      image.width = 480;
-      image.height = 480;
-      image.decoding = 'async';
-      label.textContent = String(year);
-      card.appendChild(image);
-      card.appendChild(label);
-      stage.appendChild(card);
-    });
+    for (var rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+      var years = content.calendarYears.slice(rowIndex * perRow, rowIndex * perRow + perRow);
+      var row = root.document.createElement('div');
+      var track = root.document.createElement('div');
+
+      row.className = 'marquee-row';
+      row.dataset.dir = rowIndex % 2 === 0 ? 'ltr' : 'rtl';
+      track.className = 'marquee-track';
+
+      years.forEach(function addOriginal(year) { track.appendChild(buildCalendarTile(year, false)); });
+      years.forEach(function addEcho(year) { track.appendChild(buildCalendarTile(year, true)); });
+
+      row.appendChild(track);
+      wall.appendChild(row);
+    }
+  }
+
+  function pauseCalendarWall() {
+    var wall = byId('calendarWall');
+    if (wall) {
+      wall.classList.add('is-paused');
+    }
+  }
+
+  function resumeCalendarWall() {
+    var wall = byId('calendarWall');
+    if (wall) {
+      wall.classList.remove('is-paused');
+    }
   }
 
   function buildLifeCards() {
@@ -403,6 +488,26 @@
   }
 
   function setupDelegatedActions() {
+    var openingAudio = byId('openingPenSound');
+    if (openingAudio) {
+      openingAudio.volume = .6;
+    }
+
+    ['pointerdown', 'touchend', 'mousedown', 'keydown'].forEach(function armEarlyUnlock(type) {
+      root.document.addEventListener(type, function earlyUnlock() {
+        unlockAudioContext();
+        primeOpeningSound();
+        attemptOpeningSound();
+      }, { once: true, passive: true });
+    });
+
+    root.document.addEventListener('s1:ink-schedule', function onOpeningInk(event) {
+      var detail = event.detail || {};
+      openingSoundReadyAt = Date.now();
+      openingSoundWindowMs = Number(detail.totalMs) || 3800;
+      attemptOpeningSound();
+    });
+
     root.document.addEventListener('click', function handleAction(event) {
       var goButton = event.target.closest('[data-go]');
       var imageButton = event.target.closest('[data-open-image]');
@@ -416,7 +521,14 @@
         return;
       }
       if (imageButton) {
-        media.openImage(imageButton.dataset.openImage, imageButton.dataset.alt, imageButton);
+        if (imageButton.closest('#calendarWall')) {
+          unlockAudioContext();
+          playCue('page');
+          pauseCalendarWall();
+          media.openImage(imageButton.dataset.openImage, imageButton.dataset.alt, imageButton, resumeCalendarWall);
+        } else {
+          media.openImage(imageButton.dataset.openImage, imageButton.dataset.alt, imageButton);
+        }
         return;
       }
       if (videoButton) {
@@ -445,6 +557,7 @@
     var current = byId('currentScreen');
     var progress = byId('progressBar');
     var audio = byId('inheritanceAudio');
+    var openingAudio = byId('openingPenSound');
     if (current) {
       current.textContent = String(index + 1).padStart(2, '0');
     }
@@ -453,6 +566,13 @@
     }
     if (screenId !== 's10' && audio && !audio.paused) {
       audio.pause();
+    }
+    if (screenId !== 's1' && openingAudio && !openingAudio.paused) {
+      openingAudio.pause();
+    }
+    var calendarWall = byId('calendarWall');
+    if (calendarWall) {
+      calendarWall.classList.toggle('is-offscreen', screenId !== 's2');
     }
     if (screenId === 's9' && puzzleController && !puzzleTimerStarted) {
       puzzleTimerStarted = true;
@@ -464,7 +584,7 @@
     if (experienceBuilt) {
       return;
     }
-    buildCalendars();
+    buildCalendarWall();
     buildLifeCards();
     buildSpendingChart();
     setupLifeCarousel();
@@ -497,7 +617,12 @@
       cueMuted = !cueMuted;
       storeMute(cueMuted);
       updateSoundButton();
-      if (!cueMuted) {
+      if (cueMuted) {
+        var openingAudio = byId('openingPenSound');
+        if (openingAudio && !openingAudio.paused) {
+          openingAudio.pause();
+        }
+      } else {
         playCue('page');
       }
     });

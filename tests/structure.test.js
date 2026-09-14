@@ -32,7 +32,7 @@ test('生产脚本全部是延迟加载的经典脚本', () => {
 
 test('每屏都暴露主要交互钩子', () => {
   const hooks = [
-    's1-start', 'calendar-stack', 'intro-video', 'light-compare', 'tv-video',
+    's1-start', 'calendar-wall', 'intro-video', 'light-compare', 'tv-video',
     'tax-video', 'life-cards', 'spending-chart', 'puzzle-board', 'legacy-audio',
     'poster-create'
   ];

@@ -13,6 +13,72 @@
   var reducedMotion = false;
   var currentId = null;
 
+  var OPENING_STEP_MS = 42;
+  var OPENING_PAUSE_CHARS = '，。';
+  var OPENING_PAUSE_MS = 130;
+  var OPENING_SETTLE_MS = 580;
+  var OPENING_BUTTON_DELAY_MS = 5000;
+  var OPENING_BUTTON_DELAY_REDUCED_MS = 260;
+
+  function prepareOpeningInk(lead) {
+    if (lead.dataset.inkReady) {
+      return [];
+    }
+    lead.dataset.inkReady = 'true';
+
+    var delays = [];
+    var elapsed = 0;
+
+    Array.from(lead.querySelectorAll('span')).forEach(function splitSentence(sentence) {
+      var text = sentence.textContent;
+      sentence.textContent = '';
+      Array.from(text).forEach(function addChar(character) {
+        var charSpan = root.document.createElement('span');
+        charSpan.className = 'ink-char';
+        charSpan.textContent = character;
+        charSpan.style.transitionDelay = elapsed + 'ms';
+        sentence.appendChild(charSpan);
+        delays.push(elapsed);
+        elapsed += OPENING_PAUSE_CHARS.indexOf(character) >= 0
+          ? OPENING_STEP_MS + OPENING_PAUSE_MS
+          : OPENING_STEP_MS;
+      });
+    });
+
+    return delays;
+  }
+
+  function scheduleOpeningReveal(screen) {
+    var lead = screen.querySelector('.opening-lead');
+    var button = screen.querySelector('.opening-button');
+    if (!lead || !button || lead.dataset.inkScheduled) {
+      return;
+    }
+    lead.dataset.inkScheduled = 'true';
+
+    var delays = prepareOpeningInk(lead);
+    // Force a style flush so the freshly inserted spans commit their hidden
+    // state before .is-active flips them visible; otherwise the browser may
+    // collapse both class changes into one frame and skip the transition.
+    void lead.offsetHeight;
+
+    var lastDelay = delays.length ? delays[delays.length - 1] : 0;
+    var revealSpan = lastDelay + OPENING_SETTLE_MS;
+    var buttonDelay = reducedMotion
+      ? OPENING_BUTTON_DELAY_REDUCED_MS
+      : Math.max(OPENING_BUTTON_DELAY_MS, revealSpan + 900);
+
+    root.setTimeout(function showButton() {
+      button.classList.add('is-ready');
+    }, buttonDelay);
+
+    if (!reducedMotion && typeof root.CustomEvent === 'function') {
+      root.document.dispatchEvent(new root.CustomEvent('s1:ink-schedule', {
+        detail: { delays: delays, stepMs: OPENING_STEP_MS, totalMs: revealSpan }
+      }));
+    }
+  }
+
   function loadImages(screen) {
     if (!screen) {
       return;
@@ -53,37 +119,6 @@
         stagger: id === 's1' ? .14 : .08,
         ease: 'power2.out',
         clearProps: 'transform,opacity,visibility'
-      });
-    }
-
-    if (id === 's1') {
-      gsap.fromTo('.opening-lead span', {
-        autoAlpha: 0,
-        filter: 'blur(7px)',
-        y: 5
-      }, {
-        autoAlpha: 1,
-        filter: 'blur(0px)',
-        y: 0,
-        duration: .82,
-        stagger: .28,
-        delay: .22,
-        ease: 'power2.out',
-        clearProps: 'transform,opacity,visibility,filter'
-      });
-    }
-
-    if (id === 's2') {
-      var cards = Array.from(screen.querySelectorAll('.calendar-card'));
-      gsap.from(cards, {
-        autoAlpha: 0,
-        y: -140,
-        rotation: function randomRotation(index) { return index % 2 ? -18 : 19; },
-        scale: .88,
-        duration: .72,
-        stagger: .028,
-        ease: 'back.out(1.35)',
-        clearProps: 'opacity,visibility'
       });
     }
 
@@ -154,13 +189,22 @@
     screens.forEach(function updateCurrent(item) {
       item.classList.toggle('is-current', item === screen);
     });
+
+    var firstVisit = !visited.has(screenId);
+    if (firstVisit && screenId === 's1') {
+      // Build the ink-char spans and let them commit their hidden state
+      // before .is-active lands below, otherwise the reveal transition has
+      // no prior frame to animate from and the text just snaps into view.
+      scheduleOpeningReveal(screen);
+    }
+
     screen.classList.add('is-active');
 
     var index = screens.indexOf(screen);
     loadImages(screen);
     loadImages(screens[index + 1]);
 
-    if (!visited.has(screenId)) {
+    if (firstVisit) {
       visited.add(screenId);
       animateScreen(screen);
     }

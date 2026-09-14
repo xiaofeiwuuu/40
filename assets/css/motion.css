@@ -14,29 +14,36 @@
 .motion-ready .screen.is-active .archive-reveal:nth-child(4) { transition-delay: .24s; }
 .motion-ready .screen.is-active .archive-reveal:nth-child(5) { transition-delay: .32s; }
 
-.opening-lead span {
-  transition: filter .8s ease, opacity .8s ease, transform .8s ease;
+.ink-char {
+  transition: opacity .5s ease, filter .58s ease, transform .58s cubic-bezier(.22, .7, .2, 1), text-shadow .65s ease;
 }
 
-.motion-ready .opening-lead span {
+.motion-ready .ink-char {
   opacity: 0;
-  filter: blur(5px);
-  transform: translateY(.4rem);
+  filter: blur(6px);
+  transform: scale(1.2);
+  transform-origin: 50% 70%;
+  text-shadow: 0 0 .5em rgba(33, 26, 20, .5);
 }
 
-.motion-ready .screen-opening.is-active .opening-lead span {
+.motion-ready .screen-opening.is-active .ink-char {
   opacity: 1;
   filter: blur(0);
-  transform: translateY(0);
+  transform: scale(1);
+  text-shadow: 0 0 0 rgba(33, 26, 20, 0);
 }
 
-.motion-ready .screen-opening.is-active .opening-lead span:nth-child(1) { transition-delay: .25s; }
-.motion-ready .screen-opening.is-active .opening-lead span:nth-child(2) { transition-delay: .65s; }
-.motion-ready .screen-opening.is-active .opening-lead span:nth-child(3) { transition-delay: 1.05s; }
-.motion-ready .screen-opening.is-active .opening-lead span:nth-child(4) { transition-delay: 1.45s; }
-.motion-ready .screen-opening.is-active .opening-lead span:nth-child(5) { transition-delay: 1.85s; }
+.motion-ready .opening-button {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(.5rem);
+  transition: opacity .7s ease, transform .7s cubic-bezier(.22, .7, .2, 1);
+}
 
-.opening-button {
+.motion-ready .opening-button.is-ready {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
   animation: quietPulse 2.5s ease-in-out infinite;
 }
 
@@ -144,14 +151,36 @@
   }
 
   .motion-ready .archive-reveal,
-  .motion-ready .opening-lead span {
+  .motion-ready .ink-char {
     opacity: 1 !important;
     filter: none !important;
+    transform: none !important;
+    text-shadow: none !important;
+  }
+
+  .motion-ready .opening-button {
+    opacity: 1 !important;
+    pointer-events: auto !important;
     transform: none !important;
   }
 
   .red-stroke {
     transform: scaleX(1) !important;
+  }
+
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .marquee-row {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .calendar-wall {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
   }
 
   .inheritance-line path {
