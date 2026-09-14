@@ -1,0 +1,267 @@
+:root {
+  --paper: #e7d5ad;
+  --paper-light: #f5ead1;
+  --paper-deep: #c9aa78;
+  --ink: #211a14;
+  --ink-soft: #675a4a;
+  --ink-faint: #9a8b76;
+  --archive-red: #9f332a;
+  --ceremony-red: #731b1a;
+  --ceremony-deep: #3b0d10;
+  --gold: #d6ad59;
+  --gold-light: #f0d88c;
+  --night: #17120f;
+  --stage-max: 720px;
+  --touch: 48px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+  font-family: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  background: var(--night);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--ink);
+}
+
+body.modal-open {
+  touch-action: none;
+}
+
+button,
+a,
+input {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  border: 0;
+}
+
+button:not(:disabled),
+a[href] {
+  cursor: pointer;
+}
+
+img,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+  background: rgba(34, 26, 19, .08);
+}
+
+blockquote,
+figure,
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.eyebrow {
+  color: var(--archive-red);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: clamp(.66rem, 2.7vw, .78rem);
+  font-weight: 650;
+  letter-spacing: .2em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.display-title {
+  color: var(--ink);
+  font-size: clamp(1.72rem, 7.5vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: .05em;
+  line-height: 1.18;
+}
+
+.subtitle {
+  color: var(--ink-soft);
+  font-size: clamp(.79rem, 3vw, 1rem);
+  letter-spacing: .08em;
+  line-height: 1.7;
+}
+
+.section-index {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--safe-top) + 1.05rem);
+  left: clamp(1.25rem, 5vw, 2.4rem);
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  color: var(--ink-soft);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: .65rem;
+  font-weight: 650;
+  letter-spacing: .14em;
+}
+
+.section-index span {
+  color: var(--archive-red);
+  font-variant-numeric: tabular-nums;
+}
+
+.section-index::after {
+  width: 2.4rem;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  opacity: .35;
+}
+
+.light-index {
+  color: rgba(255, 244, 218, .7);
+}
+
+.light-index span {
+  color: var(--gold);
+}
+
+.primary-button,
+.secondary-button,
+.next-button,
+.text-button,
+.skip-puzzle {
+  position: relative;
+  z-index: 3;
+  min-height: var(--touch);
+  border-radius: 999px;
+  transition: transform .2s ease, background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  min-width: 10.5rem;
+  padding: .75rem 1.35rem;
+  background: var(--archive-red);
+  box-shadow: 0 .5rem 1.6rem rgba(85, 21, 17, .22);
+  color: #fff7e9;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: .84rem;
+  font-weight: 650;
+  letter-spacing: .1em;
+  text-decoration: none;
+}
+
+.secondary-button,
+.next-button,
+.text-button,
+.skip-puzzle {
+  padding: .67rem 1.1rem;
+  border: 1px solid rgba(89, 64, 39, .35);
+  background: rgba(255, 249, 234, .55);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+.next-button span,
+.text-button span {
+  padding-left: .3rem;
+  color: var(--archive-red);
+}
+
+.text-button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.light-button {
+  border-color: rgba(245, 226, 175, .42);
+  background: rgba(255, 255, 255, .08);
+  color: #fff2d1;
+}
+
+.light-button span {
+  color: var(--gold);
+}
+
+.gold-button {
+  background: var(--gold);
+  box-shadow: 0 .55rem 1.8rem rgba(16, 6, 2, .28);
+  color: #391510;
+}
+
+.primary-button:active,
+.secondary-button:active,
+.next-button:active,
+.text-button:active,
+.skip-puzzle:active,
+.sound-toggle:active,
+.modal-close:active {
+  transform: scale(.96);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
+.noscript-note {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  z-index: 1000;
+  place-items: center;
+  padding: 2rem;
+  background: var(--night);
+  color: var(--paper-light);
+  text-align: center;
+}
