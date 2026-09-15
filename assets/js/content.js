@@ -88,7 +88,12 @@
       chapter: '日子变好',
       eyebrow: '一块一块，把日子拼完整',
       title: '拼出好日子',
-      subtitle: '拖动拼图，或依次点击两块进行交换'
+      subtitle: '拖动拼图，或依次点击两块进行交换',
+      puzzleImage: 'assets/images/scenes/s9-good-life-base.webp',
+      completionFrames: [
+        'assets/images/scenes/s9-good-life-walk-a.webp',
+        'assets/images/scenes/s9-good-life-walk-b.webp'
+      ]
     },
     {
       id: 's10',
@@ -113,22 +118,26 @@
   var lifeRecords = [
     {
       year: 2001,
-      text: '修十大队公路，砸碎石。',
+      text: '2001年1月7日，修十大队公路，砸碎石。',
+      scene: 'assets/images/scenes/s7-2001.webp',
       image: 'assets/images/records/s7-2001.jpg'
     },
     {
       year: 2004,
-      text: '在成都第一次吃肯德基，“确实可以”。',
+      text: '2004年4月13日，在成都，妹弟崔定元一同出去耍，请我吃肯德基，确实可以，也是我第一次吃到这种味道。',
+      scene: 'assets/images/scenes/s7-2004.webp',
       image: 'assets/images/records/s7-2004.jpg'
     },
     {
       year: 2015,
-      text: '家中正式安通天然气，上户费4380元。',
+      text: '2015年4月6日，家中正式安通天然气，上户费4380元。',
+      scene: 'assets/images/scenes/s7-2015.webp',
       image: 'assets/images/records/s7-2015.jpg'
     },
     {
       year: 2020,
-      text: '赞助陈芳4000元购买现代车用。',
+      text: '2020年12月10日，剩的4000元赞助陈芳购买那台现代车用。',
+      scene: 'assets/images/scenes/s7-2020.webp',
       image: 'assets/images/records/s7-2020.jpg'
     }
   ];
@@ -165,14 +174,28 @@
       question: '中国从哪一年起全面取消农业税？',
       options: ['2000年', '2006年', '2010年', '2015年'],
       correct: 1,
-      explanation: '2005年12月29日，十届全国人大常委会第十九次会议决定，自2006年1月1日起，废止《中华人民共和国农业税条例》，全面取消农业税。',
+      explanation: '2005年12月29日，十届全国人大常委会第十九次会议决定，自2006年1月1日起，废止《中华人民共和国农业税条例》，全面取消农业税，中国的农业税从此退出历史舞台。',
+      image: 'assets/images/scenes/quiz1-agricultural-tax.webp',
+      answeredImage: 'assets/images/scenes/quiz1-agricultural-tax-answered.webp',
+      imageAspect: '1374 / 1145',
+      answerArea: { top: 45, right: 22, bottom: 28, left: 22 },
+      autoOpenOn: 's7',
+      correctCloseDelayMs: 1000,
       next: 's7'
     },
     quiz2: {
       question: '我国在（　）年脱贫攻坚取得全面胜利。',
       options: ['2019', '2020', '2021', '2022'],
       correct: 2,
-      explanation: '2021年2月25日，我国脱贫攻坚战取得了全面胜利。',
+      explanation: '2021年2月25日，习近平总书记在全国脱贫攻坚总结表彰大会上庄严宣告：我国脱贫攻坚战取得了全面胜利，现行标准下9899万农村贫困人口全部脱贫，832个贫困县全部摘帽，12.8万个贫困村全部出列，区域性整体贫困得到解决，完成了消除绝对贫困的艰巨任务，创造了又一个彪炳史册的人间奇迹。他同时强调，要切实做好巩固拓展脱贫攻坚成果同乡村振兴有效衔接各项工作，让脱贫基础更加稳固、成效更可持续。',
+      emphasis: ['2021', '2', '25', '9899', '832', '12.8'],
+      image: 'assets/images/scenes/quiz2-poverty-relief.webp',
+      answeredImage: 'assets/images/scenes/quiz2-poverty-relief-answered.webp',
+      imageAspect: '3 / 2',
+      answerArea: { top: 46, right: 21.5, bottom: 30.5, left: 24.5 },
+      autoOpenOn: 's10',
+      mandatory: true,
+      correctCloseDelayMs: 1000,
       next: 's10'
     }
   };

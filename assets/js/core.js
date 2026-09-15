@@ -53,6 +53,9 @@
     }
 
     var percentage = Math.min(100, Math.max(0, number / (max / 100)));
+    if (number > 0 && percentage < 6) {
+      percentage = 6;
+    }
     var nearestInteger = Math.round(percentage);
 
     return Math.abs(percentage - nearestInteger) < Number.EPSILON * 100
@@ -81,12 +84,41 @@
     return Math.min(maximum, Math.max(minimum, value));
   }
 
+  function shouldAutoOpenQuiz(screenId, quiz, alreadyShown) {
+    return Boolean(quiz)
+      && Boolean(quiz.autoOpenOn)
+      && screenId === quiz.autoOpenOn
+      && !alreadyShown;
+  }
+
+  function getQuizAnswerOutcome(selectedIndex, correctIndex) {
+    var isCorrect = Number(selectedIndex) === Number(correctIndex);
+    return {
+      isCorrect: isCorrect,
+      autoAdvance: isCorrect,
+      showExplanation: !isCorrect
+    };
+  }
+
+  function getQuizCloseDelay(quiz) {
+    var milliseconds = Number(quiz && quiz.correctCloseDelayMs);
+    return Number.isFinite(milliseconds) && milliseconds >= 0 ? milliseconds : 1000;
+  }
+
+  function toCssAssetUrl(assetPath) {
+    return String(assetPath || '').replace(/^assets\//, '../');
+  }
+
   return {
     getPresentationMode: getPresentationMode,
     readCapabilities: readCapabilities,
     chartHeight: chartHeight,
     canCreateQr: canCreateQr,
     nextScreenId: nextScreenId,
-    clamp: clamp
+    clamp: clamp,
+    shouldAutoOpenQuiz: shouldAutoOpenQuiz,
+    getQuizAnswerOutcome: getQuizAnswerOutcome,
+    getQuizCloseDelay: getQuizCloseDelay,
+    toCssAssetUrl: toCssAssetUrl
   };
 }));

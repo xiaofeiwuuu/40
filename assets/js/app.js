@@ -23,6 +23,12 @@
   var lifeStartX = null;
   var quizTrigger = null;
   var puzzleTimerStarted = false;
+  var puzzleFrameTimer = null;
+  var puzzleFrameIndex = 0;
+  var puzzleCompletionReady = false;
+  var activeScreenId = null;
+  var autoQuizShown = {};
+  var quizAdvanceTimer = null;
 
   function byId(id) {
     return root.document.getElementById(id);
@@ -97,10 +103,44 @@
       return;
     }
 
+    var now = context.currentTime;
+
+    if (kind === 'snap') {
+      var click = context.createOscillator();
+      var clickGain = context.createGain();
+      click.type = 'square';
+      click.frequency.setValueAtTime(1280, now);
+      click.frequency.exponentialRampToValueAtTime(360, now + .055);
+      clickGain.gain.setValueAtTime(.075, now);
+      clickGain.gain.exponentialRampToValueAtTime(.0001, now + .06);
+      click.connect(clickGain);
+      clickGain.connect(context.destination);
+      click.start(now);
+      click.stop(now + .065);
+      return;
+    }
+
+    if (kind === 'celebrate') {
+      [523.25, 659.25, 783.99].forEach(function ring(frequency, index) {
+        var bell = context.createOscillator();
+        var bellGain = context.createGain();
+        var start = now + index * .105;
+        bell.type = 'sine';
+        bell.frequency.setValueAtTime(frequency, start);
+        bellGain.gain.setValueAtTime(.0001, start);
+        bellGain.gain.exponentialRampToValueAtTime(.052, start + .018);
+        bellGain.gain.exponentialRampToValueAtTime(.0001, start + .42);
+        bell.connect(bellGain);
+        bellGain.connect(context.destination);
+        bell.start(start);
+        bell.stop(start + .45);
+      });
+      return;
+    }
+
     var frequencies = { page: 320, light: 520, snap: 410 };
     var oscillator = context.createOscillator();
     var gain = context.createGain();
-    var now = context.currentTime;
     oscillator.type = kind === 'light' ? 'sine' : 'triangle';
     oscillator.frequency.setValueAtTime(frequencies[kind] || frequencies.page, now);
     oscillator.frequency.exponentialRampToValueAtTime((frequencies[kind] || 320) * 1.18, now + .08);
@@ -113,10 +153,88 @@
     oscillator.stop(now + .15);
   }
 
+  function setPuzzleCompletionFrame(board, frameIndex) {
+    var frames = Array.from(board.querySelectorAll('.puzzle-completion-frame'));
+    frames.forEach(function updateFrame(frame, index) {
+      frame.classList.toggle('is-active', index === frameIndex);
+    });
+  }
+
+  function stopPuzzleFrameCycle() {
+    clearTimeout(puzzleFrameTimer);
+    puzzleFrameTimer = null;
+  }
+
+  function startPuzzleFrameCycle(board, initialDelay) {
+    if (!board || !puzzle.shouldCycleCompletionFrames(activeScreenId, puzzleCompletionReady)) {
+      return;
+    }
+    stopPuzzleFrameCycle();
+    var frames = board.querySelectorAll('.puzzle-completion-frame');
+    if (!frames.length) {
+      return;
+    }
+
+    var reducedMotion = root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      puzzleFrameIndex = frames.length - 1;
+      setPuzzleCompletionFrame(board, puzzleFrameIndex);
+      board.classList.add('has-live-frames');
+      return;
+    }
+
+    puzzleFrameTimer = setTimeout(function revealFrames() {
+      board.classList.add('has-live-frames');
+      setPuzzleCompletionFrame(board, puzzleFrameIndex);
+
+      function advanceFrame() {
+        if (!puzzle.shouldCycleCompletionFrames(activeScreenId, puzzleCompletionReady)) {
+          stopPuzzleFrameCycle();
+          return;
+        }
+        puzzleFrameIndex = puzzle.nextCompletionFrameIndex(puzzleFrameIndex, frames.length);
+        setPuzzleCompletionFrame(board, puzzleFrameIndex);
+        puzzleFrameTimer = setTimeout(advanceFrame, 1800);
+      }
+
+      puzzleFrameTimer = setTimeout(advanceFrame, 1800);
+    }, Number(initialDelay) || 0);
+  }
+
+  function showPuzzleCelebration(board, completionFrames) {
+    if (!board) {
+      return;
+    }
+    var layer = board.querySelector('.puzzle-celebration');
+    if (!layer) {
+      layer = root.document.createElement('div');
+      layer.className = 'puzzle-celebration';
+      layer.setAttribute('aria-hidden', 'true');
+      var frameMarkup = (completionFrames || []).map(function makeCompletionFrame(source, index) {
+        return '<img class="puzzle-completion-frame' + (index === 0 ? ' is-active' : '') + '" src="' + source + '" alt="">';
+      }).join('');
+      layer.innerHTML = frameMarkup + [
+        '<i class="puzzle-smoke smoke-a"></i>',
+        '<i class="puzzle-smoke smoke-b"></i>',
+        '<i class="puzzle-glow bulb-a"></i>',
+        '<i class="puzzle-glow bulb-b"></i>',
+        '<i class="puzzle-tv-glow"></i>'
+      ].join('');
+      board.appendChild(layer);
+    }
+    board.classList.remove('is-complete');
+    void board.offsetWidth;
+    board.classList.add('is-complete');
+    puzzleCompletionReady = true;
+    puzzleFrameIndex = 0;
+    startPuzzleFrameCycle(board, 400);
+  }
+
   var openingSoundReadyAt = 0;
   var openingSoundWindowMs = 0;
   var openingSoundStarted = false;
   var openingSoundPrimed = false;
+  var activeInkScreenId = null;
 
   function primeOpeningSound() {
     var audio = byId('openingPenSound');
@@ -525,8 +643,8 @@
       article.className = 'life-card';
       article.innerHTML = [
         '<div class="life-card-inner">',
-        '<button type="button" data-open-image="', record.image, '" data-alt="', record.year, '年生活台历原稿">',
-        '<img data-src="', record.image, '" alt="', record.year, '年生活台历原稿" width="1600" height="900">',
+        '<button type="button" data-open-image="', record.image, '" data-alt="', record.year, '年台历原稿">',
+        '<img data-src="', record.scene, '" alt="', record.year, '年生活场景" width="700" height="467">',
         '<span class="life-card-year">', record.year, '</span>',
         '<blockquote>', record.text, '</blockquote>',
         '</button>',
@@ -559,8 +677,6 @@
 
   function setupLifeCarousel() {
     var carousel = root.document.querySelector('.life-carousel');
-    byId('lifePrev').addEventListener('click', function previous() { moveLife(-1); });
-    byId('lifeNext').addEventListener('click', function next() { moveLife(1); });
     if (!carousel) {
       return;
     }
@@ -581,25 +697,66 @@
   }
 
   function buildSpendingChart() {
+    var track = byId('spendingTrack');
     var chart = byId('spendingChart');
-    if (!chart || chart.children.length) {
+    if (!track || !chart || chart.querySelector('.spending-item')) {
       return;
     }
     var maximum = Math.max.apply(null, content.spending.map(function amount(item) { return item.amount; }));
-    content.spending.forEach(function addBar(item) {
-      var button = root.document.createElement('button');
+    var total = content.spending.length;
+    var inset = total ? 50 / total : 0;
+    track.style.left = inset + '%';
+    track.style.right = inset + '%';
+    content.spending.forEach(function addItem(item, index) {
+      // Node position is local to the (inset) track box; bar position is in the
+      // same 0-100 scale as the drag gesture, which spans the full chart width -
+      // it marks the bar's own center so the scrub growth lines up with the bar.
+      var trackPosition = total > 1 ? (index / (total - 1)) * 100 : 0;
+      var barPosition = ((index + .5) / total) * 100;
       var percentage = core.chartHeight(item.amount, maximum);
+
+      var node = root.document.createElement('button');
+      node.type = 'button';
+      node.className = 'spending-node';
+      node.style.left = trackPosition + '%';
+      node.dataset.index = String(index);
+      node.dataset.position = String(barPosition);
+      node.setAttribute('aria-label', item.year + '年年货开支' + item.amount + '元，点击查看账目');
+      node.innerHTML = '<span class="spending-node-year">' + item.year + '</span>';
+      track.appendChild(node);
+
+      var button = root.document.createElement('button');
       button.type = 'button';
       button.className = 'spending-item';
+      button.dataset.index = String(index);
+      button.dataset.position = String(barPosition);
+      button.dataset.targetHeight = String(percentage);
       button.dataset.openImage = item.image;
       button.dataset.alt = item.year + '年年货开支台历原稿：' + item.text;
       button.setAttribute('aria-label', item.year + '年年货开支' + item.amount + '元，点击查看原稿');
       button.innerHTML = [
         '<span class="spending-amount">¥', item.amount, '</span>',
-        '<i class="spending-bar" style="height:', percentage, '%"></i>',
-        '<span class="spending-year">', item.year, '</span>'
+        '<i class="spending-bar" style="height:0%"></i>'
       ].join('');
       chart.appendChild(button);
+    });
+  }
+
+  function showSpendingDetail(index) {
+    var item = content.spending[index];
+    var detail = byId('spendingDetail');
+    if (!item || !detail) {
+      return;
+    }
+    detail.innerHTML = [
+      '<strong>', item.year, '年 · ¥', item.amount, '</strong>',
+      '<span>', item.text, '</span>',
+      '<button type="button" class="text-link" data-open-image="', item.image, '" data-alt="',
+      item.year, '年年货开支台历原稿：', item.text, '">查看原稿</button>'
+    ].join('');
+    detail.classList.add('is-visible');
+    Array.from(root.document.querySelectorAll('.spending-node')).forEach(function toggle(node) {
+      node.classList.toggle('is-selected', Number(node.dataset.index) === index);
     });
   }
 
@@ -608,12 +765,40 @@
     if (!dialog || dialog.hidden) {
       return;
     }
+    clearTimeout(quizAdvanceTimer);
+    quizAdvanceTimer = null;
     dialog.hidden = true;
+    dialog.classList.remove('quiz-dialog-photo');
+    delete dialog.dataset.mandatory;
     root.document.body.classList.remove('modal-open');
     if (quizTrigger && typeof quizTrigger.focus === 'function') {
       quizTrigger.focus({ preventScroll: true });
     }
     quizTrigger = null;
+  }
+
+  function renderQuizExplanation(container, quiz) {
+    var text = quiz.explanation || '';
+    var values = Array.isArray(quiz.emphasis) ? quiz.emphasis.slice() : [];
+    values.sort(function longestFirst(a, b) { return b.length - a.length; });
+    if (!values.length) {
+      container.textContent = text;
+      return;
+    }
+    var escaped = values.map(function escapePattern(value) {
+      return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    });
+    var pattern = new RegExp(escaped.join('|'), 'g');
+    var cursor = 0;
+    var match;
+    while ((match = pattern.exec(text)) !== null) {
+      container.appendChild(root.document.createTextNode(text.slice(cursor, match.index)));
+      var strong = root.document.createElement('strong');
+      strong.textContent = match[0];
+      container.appendChild(strong);
+      cursor = match.index + match[0].length;
+    }
+    container.appendChild(root.document.createTextNode(text.slice(cursor)));
   }
 
   function goTo(screenId) {
@@ -635,23 +820,53 @@
 
     quizTrigger = trigger || root.document.activeElement;
     panel.innerHTML = '';
-    var closeButton = root.document.createElement('button');
-    closeButton.type = 'button';
-    closeButton.className = 'quiz-close';
-    closeButton.setAttribute('aria-label', '稍后再答');
-    closeButton.textContent = '×';
-    closeButton.addEventListener('click', closeQuiz);
-    panel.appendChild(closeButton);
+    panel.className = 'modal-panel quiz-panel' + (quiz.image ? ' quiz-panel-scene' : '');
+    dialog.dataset.mandatory = quiz.mandatory ? 'true' : 'false';
+
+    var closeButton = null;
+    if (!quiz.mandatory) {
+      closeButton = root.document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'quiz-close';
+      closeButton.setAttribute('aria-label', '稍后再答');
+      closeButton.textContent = '×';
+      closeButton.addEventListener('click', closeQuiz);
+      panel.appendChild(closeButton);
+    }
 
     var kicker = root.document.createElement('p');
-    kicker.className = 'quiz-kicker';
+    kicker.className = quiz.image ? 'quiz-kicker sr-only' : 'quiz-kicker';
     kicker.textContent = '时代小问答';
-    panel.appendChild(kicker);
 
     var title = root.document.createElement('h2');
     title.id = 'quizTitle';
+    title.className = quiz.image ? 'sr-only' : '';
     title.textContent = quiz.question;
-    panel.appendChild(title);
+
+    var answerSurface = panel;
+    if (quiz.image) {
+      var stage = root.document.createElement('div');
+      stage.className = 'quiz-scene-stage';
+      stage.style.setProperty('--quiz-scene', 'url("' + core.toCssAssetUrl(quiz.image) + '")');
+      stage.style.setProperty('--quiz-aspect', quiz.imageAspect || '3 / 2');
+      stage.appendChild(kicker);
+      stage.appendChild(title);
+
+      answerSurface = root.document.createElement('div');
+      answerSurface.className = 'quiz-answer-cover';
+      var area = quiz.answerArea;
+      if (area) {
+        answerSurface.style.setProperty('--quiz-answer-top', area.top + '%');
+        answerSurface.style.setProperty('--quiz-answer-right', area.right + '%');
+        answerSurface.style.setProperty('--quiz-answer-bottom', area.bottom + '%');
+        answerSurface.style.setProperty('--quiz-answer-left', area.left + '%');
+      }
+      stage.appendChild(answerSurface);
+      panel.appendChild(stage);
+    } else {
+      panel.appendChild(kicker);
+      panel.appendChild(title);
+    }
 
     var options = root.document.createElement('div');
     options.className = 'quiz-options';
@@ -659,31 +874,65 @@
       var button = root.document.createElement('button');
       button.type = 'button';
       button.className = 'quiz-option';
-      button.innerHTML = '<b>' + String.fromCharCode(65 + index) + '</b><span>' + option + '</span>';
+      if (quiz.image) {
+        button.setAttribute('aria-label', String.fromCharCode(65 + index) + '. ' + option);
+      } else {
+        button.innerHTML = '<b>' + String.fromCharCode(65 + index) + '</b><span>' + option + '</span>';
+      }
       button.addEventListener('click', function answer() {
         var allOptions = Array.from(options.querySelectorAll('.quiz-option'));
         allOptions.forEach(function disable(item) { item.disabled = true; });
-        button.classList.add(index === quiz.correct ? 'is-correct' : 'is-wrong');
+        var outcome = core.getQuizAnswerOutcome(index, quiz.correct);
+        button.classList.add('is-selected');
+        button.classList.add(outcome.isCorrect ? 'is-correct' : 'is-wrong');
         allOptions[quiz.correct].classList.add('is-correct');
-        feedback.hidden = false;
-        nextButton.hidden = false;
-        playCue(index === quiz.correct ? 'light' : 'page');
-        nextButton.focus();
+        if (quiz.answeredImage && stage) {
+          stage.style.setProperty('--quiz-scene', 'url("' + core.toCssAssetUrl(quiz.answeredImage) + '")');
+        }
+        playCue(outcome.isCorrect ? 'light' : 'page');
+
+        if (outcome.autoAdvance) {
+          feedback.hidden = false;
+          feedback.textContent = '✓ 答对了！';
+          feedback.className = 'quiz-feedback quiz-feedback-correct';
+          panel.classList.add('is-correct-glow');
+          quizAdvanceTimer = root.setTimeout(function advance() {
+            if (dialog.hidden) {
+              return;
+            }
+            closeQuiz();
+            goTo(quiz.next);
+          }, core.getQuizCloseDelay(quiz));
+        } else if (outcome.showExplanation) {
+          panel.classList.add('is-shake');
+          panel.addEventListener('animationend', function revealExplanation(event) {
+            if (event.animationName !== 'quizShake') {
+              return;
+            }
+            panel.removeEventListener('animationend', revealExplanation);
+            panel.classList.remove('is-shake');
+            feedback.textContent = '';
+            renderQuizExplanation(feedback, quiz);
+            feedback.className = 'quiz-feedback';
+            feedback.hidden = false;
+            nextButton.hidden = false;
+            nextButton.focus();
+          });
+        }
       });
       options.appendChild(button);
     });
-    panel.appendChild(options);
+    answerSurface.appendChild(options);
 
-    var feedback = root.document.createElement('p');
+    var feedback = root.document.createElement('div');
     feedback.className = 'quiz-feedback';
-    feedback.textContent = quiz.explanation;
     feedback.hidden = true;
     panel.appendChild(feedback);
 
     var nextButton = root.document.createElement('button');
     nextButton.type = 'button';
     nextButton.className = 'primary-button quiz-next';
-    nextButton.textContent = '继续阅读 →';
+    nextButton.textContent = '知道了';
     nextButton.hidden = true;
     nextButton.addEventListener('click', function continueReading() {
       var next = quiz.next;
@@ -694,7 +943,10 @@
 
     dialog.hidden = false;
     root.document.body.classList.add('modal-open');
-    closeButton.focus({ preventScroll: true });
+    var initialFocus = closeButton || options.querySelector('.quiz-option');
+    if (initialFocus) {
+      initialFocus.focus({ preventScroll: true });
+    }
   }
 
   function setupAudio() {
@@ -750,9 +1002,39 @@
 
     root.document.addEventListener('s1:ink-schedule', function onOpeningInk(event) {
       var detail = event.detail || {};
+      activeInkScreenId = detail.screenId || 's1';
+      openingSoundStarted = false;
       openingSoundReadyAt = Date.now();
       openingSoundWindowMs = Number(detail.totalMs) || 3800;
       attemptOpeningSound();
+    });
+
+    root.document.addEventListener('quote:ink-schedule', function onQuoteInk(event) {
+      var detail = event.detail || {};
+      var lastDelay = Array.isArray(detail.delays) && detail.delays.length
+        ? detail.delays[detail.delays.length - 1]
+        : 0;
+      activeInkScreenId = detail.screenId || null;
+      openingSoundStarted = false;
+      openingSoundReadyAt = Date.now();
+      openingSoundWindowMs = lastDelay + 600;
+      attemptOpeningSound();
+    });
+
+    root.document.addEventListener('quiz:auto-open', function onAutoQuiz(event) {
+      var key = event.detail && event.detail.key;
+      if (key) {
+        openQuiz(key);
+      }
+    });
+
+    root.document.addEventListener('legacy-audio:auto-play', function onAutoPlayLegacyAudio() {
+      var audio = byId('inheritanceAudio');
+      if (!audio || !audio.paused) {
+        return;
+      }
+      media.pauseAll();
+      audio.play().catch(function ignoreBlocked() {});
     });
 
     root.document.addEventListener('calendar:flip', function onCalendarFlip() {
@@ -808,6 +1090,7 @@
       var videoButton = event.target.closest('[data-open-video]');
       var quizButton = event.target.closest('[data-open-quiz]');
       var expandItem = event.target.closest('.expand-item');
+      var spendingNode = event.target.closest('.spending-node');
 
       if (goButton) {
         unlockAudioContext();
@@ -821,7 +1104,16 @@
         closeCalendarExpand(Number(expandItem.dataset.year));
         return;
       }
+      if (spendingNode) {
+        unlockAudioContext();
+        playCue('page');
+        showSpendingDetail(Number(spendingNode.dataset.index));
+        return;
+      }
       if (imageButton) {
+        if (imageButton.classList.contains('spending-item')) {
+          showSpendingDetail(Number(imageButton.dataset.index));
+        }
         media.openImage(imageButton.dataset.openImage, imageButton.dataset.alt, imageButton);
         return;
       }
@@ -836,12 +1128,12 @@
 
     var quizDialog = byId('quizDialog');
     quizDialog.addEventListener('click', function closeBackdrop(event) {
-      if (event.target === quizDialog) {
+      if (event.target === quizDialog && quizDialog.dataset.mandatory !== 'true') {
         closeQuiz();
       }
     });
     root.document.addEventListener('keydown', function escapeQuiz(event) {
-      if (event.key === 'Escape' && !quizDialog.hidden) {
+      if (event.key === 'Escape' && !quizDialog.hidden && quizDialog.dataset.mandatory !== 'true') {
         closeQuiz();
       }
     });
@@ -852,6 +1144,7 @@
     var progress = byId('progressBar');
     var audio = byId('inheritanceAudio');
     var openingAudio = byId('openingPenSound');
+    activeScreenId = screenId;
     if (current) {
       current.textContent = String(index + 1).padStart(2, '0');
     }
@@ -861,13 +1154,31 @@
     if (screenId !== 's10' && audio && !audio.paused) {
       audio.pause();
     }
-    if (screenId !== 's1' && openingAudio && !openingAudio.paused) {
+    if (screenId !== activeInkScreenId && openingAudio && !openingAudio.paused) {
       openingAudio.pause();
     }
     if (screenId === 's9' && puzzleController && !puzzleTimerStarted) {
       puzzleTimerStarted = true;
       puzzleController.startSkipTimer();
     }
+    if (screenId !== 's9') {
+      stopPuzzleFrameCycle();
+    } else if (puzzleCompletionReady && !puzzleFrameTimer) {
+      startPuzzleFrameCycle(byId('puzzleBoard'), 0);
+    }
+    Object.keys(content.quizzes).some(function openScheduledQuiz(key) {
+      var quiz = content.quizzes[key];
+      if (!core.shouldAutoOpenQuiz(screenId, quiz, Boolean(autoQuizShown[key]))) {
+        return false;
+      }
+      autoQuizShown[key] = true;
+      root.setTimeout(function openAfterSnap() {
+        if (activeScreenId === screenId) {
+          openQuiz(key);
+        }
+      }, 360);
+      return true;
+    });
   }
 
   function buildExperience() {
@@ -887,7 +1198,13 @@
     byId('openPoster').addEventListener('click', function openPoster() { poster.open(this); });
 
     var puzzleBoard = byId('puzzleBoard');
-    puzzleBoard.style.setProperty('--puzzle-image', 'url("../images/donation/02.jpg")');
+    var puzzleScreen = content.screens.find(function findPuzzleScreen(screen) { return screen.id === 's9'; });
+    var puzzleImage = core.toCssAssetUrl(puzzleScreen.puzzleImage);
+    puzzleBoard.style.setProperty('--puzzle-image', 'url("' + puzzleImage + '")');
+    puzzleScreen.completionFrames.forEach(function preloadCompletionFrame(source) {
+      var image = new root.Image();
+      image.src = source;
+    });
     puzzleController = puzzle.mount({
       board: puzzleBoard,
       success: byId('puzzleSuccess'),
@@ -895,9 +1212,13 @@
       skipButton: byId('skipPuzzle'),
       skipAfterMs: 15000,
       startSkipTimer: false,
+      onCorrectPlacement: function puzzlePieceCorrect() {
+        playCue('snap');
+      },
       onSolved: function puzzleSolved(wasSkipped) {
         if (!wasSkipped) {
-          playCue('snap');
+          showPuzzleCelebration(puzzleBoard, puzzleScreen.completionFrames);
+          playCue('celebrate');
         }
       }
     });

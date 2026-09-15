@@ -23,7 +23,7 @@ test('平板横屏保持完整体验', () => {
 test('柱形高度使用线性比例并限制在零到一百', () => {
   assert.equal(core.chartHeight(1640, 1640), 100);
   assert.equal(core.chartHeight(820, 1640), 50);
-  assert.equal(core.chartHeight(16, 1640), 16 / 16.4);
+  assert.equal(core.chartHeight(16, 1640), 6);
   assert.equal(core.chartHeight(-1, 1640), 0);
   assert.equal(core.chartHeight(1700, 1640), 100);
   assert.equal(core.chartHeight(10, 0), 0);
@@ -42,3 +42,34 @@ test('下一屏按既定顺序计算且末屏没有下一屏', () => {
   assert.equal(core.nextScreenId('missing', ids), null);
 });
 
+test('自动答题只在目标屏首次进入时打开', () => {
+  const quiz = { autoOpenOn: 's10' };
+  assert.equal(core.shouldAutoOpenQuiz('s10', quiz, false), true);
+  assert.equal(core.shouldAutoOpenQuiz('s10', quiz, true), false);
+  assert.equal(core.shouldAutoOpenQuiz('s9', quiz, false), false);
+});
+
+test('答对自动前进，答错需要用户确认', () => {
+  assert.deepEqual(core.getQuizAnswerOutcome(2, 2), {
+    isCorrect: true,
+    autoAdvance: true,
+    showExplanation: false
+  });
+  assert.deepEqual(core.getQuizAnswerOutcome(1, 2), {
+    isCorrect: false,
+    autoAdvance: false,
+    showExplanation: true
+  });
+});
+
+test('答对反馈严格保留一秒再关闭', () => {
+  assert.equal(core.getQuizCloseDelay({ correctCloseDelayMs: 1000 }), 1000);
+  assert.equal(core.getQuizCloseDelay({}), 1000);
+});
+
+test('动态 CSS 素材路径从 assets 根转为样式表相对路径', () => {
+  assert.equal(
+    core.toCssAssetUrl('assets/images/scenes/quiz2-poverty-relief.webp'),
+    '../images/scenes/quiz2-poverty-relief.webp'
+  );
+});

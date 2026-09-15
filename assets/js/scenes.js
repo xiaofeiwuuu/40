@@ -20,16 +20,16 @@
   var OPENING_BUTTON_DELAY_MS = 5000;
   var OPENING_BUTTON_DELAY_REDUCED_MS = 260;
 
-  function prepareOpeningInk(lead) {
-    if (lead.dataset.inkReady) {
+  function prepareInkSpans(container) {
+    if (container.dataset.inkReady) {
       return [];
     }
-    lead.dataset.inkReady = 'true';
+    container.dataset.inkReady = 'true';
 
     var delays = [];
     var elapsed = 0;
 
-    Array.from(lead.querySelectorAll('span')).forEach(function splitSentence(sentence) {
+    Array.from(container.querySelectorAll('span')).forEach(function splitSentence(sentence) {
       var text = sentence.textContent;
       sentence.textContent = '';
       Array.from(text).forEach(function addChar(character) {
@@ -56,7 +56,7 @@
     }
     lead.dataset.inkScheduled = 'true';
 
-    var delays = prepareOpeningInk(lead);
+    var delays = prepareInkSpans(lead);
     // Force a style flush so the freshly inserted spans commit their hidden
     // state before .is-active flips them visible; otherwise the browser may
     // collapse both class changes into one frame and skip the transition.
@@ -74,7 +74,28 @@
 
     if (!reducedMotion && typeof root.CustomEvent === 'function') {
       root.document.dispatchEvent(new root.CustomEvent('s1:ink-schedule', {
-        detail: { delays: delays, stepMs: OPENING_STEP_MS, totalMs: revealSpan }
+        detail: { delays: delays, stepMs: OPENING_STEP_MS, totalMs: revealSpan, screenId: screen.id }
+      }));
+    }
+  }
+
+  function scheduleQuoteInk(screen) {
+    // Any screen that wants the handwriting treatment just wraps its
+    // .record-quote text in a <span> - no per-screen wiring needed here.
+    var quote = screen.querySelector('.record-quote');
+    if (!quote || quote.dataset.inkScheduled || !quote.querySelector('span')) {
+      return;
+    }
+    quote.dataset.inkScheduled = 'true';
+
+    var delays = prepareInkSpans(quote);
+    // Same reflow-flush trick as the opening screen - the spans must commit
+    // their hidden state before .is-active reveals them.
+    void quote.offsetHeight;
+
+    if (!reducedMotion && typeof root.CustomEvent === 'function') {
+      root.document.dispatchEvent(new root.CustomEvent('quote:ink-schedule', {
+        detail: { delays: delays, stepMs: OPENING_STEP_MS, screenId: screen.id }
       }));
     }
   }
@@ -124,7 +145,7 @@
     }
 
     if (id === 's5') {
-      gsap.fromTo(screen.querySelector('.tv-shell'), {
+      gsap.fromTo(screen.querySelector('.night-scene'), {
         filter: 'brightness(.35)'
       }, {
         filter: 'brightness(1)',
@@ -134,34 +155,15 @@
       });
     }
 
-    if (id === 's6') {
-      gsap.fromTo(screen.querySelectorAll('.red-stroke'), {
-        scaleX: 0,
-        transformOrigin: 'left center'
-      }, {
-        scaleX: 1,
-        duration: .85,
-        stagger: .28,
-        delay: .42,
-        ease: 'power2.out'
-      });
-    }
-
-    if (id === 's8') {
-      gsap.to(screen.querySelectorAll('.spending-bar'), {
-        scaleY: 1,
-        duration: 1.15,
-        stagger: .13,
-        ease: 'power3.out'
-      });
-    }
-
     if (id === 's10') {
-      gsap.to(screen.querySelector('.inheritance-line path'), {
-        strokeDashoffset: 0,
-        duration: 1.65,
-        delay: .32,
-        ease: 'power1.inOut'
+      gsap.fromTo(screen.querySelector('.legacy-scene img'), {
+        clipPath: 'inset(0 100% 0 0)'
+      }, {
+        clipPath: 'inset(0 0% 0 0)',
+        duration: 1.4,
+        delay: .2,
+        ease: 'power2.inOut',
+        clearProps: 'clipPath'
       });
     }
 
@@ -192,11 +194,15 @@
     });
 
     var firstVisit = !visited.has(screenId);
-    if (firstVisit && screenId === 's1') {
+    if (firstVisit) {
       // Build the ink-char spans and let them commit their hidden state
       // before .is-active lands below, otherwise the reveal transition has
       // no prior frame to animate from and the text just snaps into view.
-      scheduleOpeningReveal(screen);
+      if (screenId === 's1') {
+        scheduleOpeningReveal(screen);
+      } else {
+        scheduleQuoteInk(screen);
+      }
     }
 
     screen.classList.add('is-active');
@@ -208,6 +214,31 @@
     if (firstVisit) {
       visited.add(screenId);
       animateScreen(screen);
+      if (screenId === 's7' && typeof root.CustomEvent === 'function') {
+        // Spec calls for the quiz to pop mid-transition from s6 into s7 -
+        // give the scroll-snap settle a beat before it appears.
+        root.setTimeout(function autoQuiz() {
+          root.document.dispatchEvent(new root.CustomEvent('quiz:auto-open', { detail: { key: 'quiz1' } }));
+        }, 450);
+      }
+      if (screenId === 's10' && typeof root.CustomEvent === 'function') {
+        root.setTimeout(function autoPlayLegacyAudio() {
+          root.document.dispatchEvent(new root.CustomEvent('legacy-audio:auto-play'));
+        }, 450);
+      }
+      if (screenId === 's11') {
+        var posterButton = screen.querySelector('#openPoster');
+        if (posterButton) {
+          // Match the donation-photo + seal entrance timeline in
+          // animateScreen() (stagger .16s x3 + .85s, then seal at .95s
+          // delay + .55s = ~1.5s total) so the button lands right after it
+          // settles - fall back to a quick reveal when there's no motion.
+          var posterButtonDelay = (reducedMotion || !root.gsap) ? 280 : 1550;
+          root.setTimeout(function showPosterButton() {
+            posterButton.classList.add('is-ready');
+          }, posterButtonDelay);
+        }
+      }
     }
 
     if (typeof onActive === 'function') {
@@ -217,10 +248,14 @@
 
   function updateCompare(value) {
     var percentage = Math.max(0, Math.min(100, value));
-    var layer = root.document.getElementById('lightLayer');
-    if (layer) {
-      layer.style.clipPath = 'inset(0 ' + (100 - percentage) + '% 0 0)';
+    var frames = root.document.querySelectorAll('#compareStage .compare-frame');
+    if (!frames.length) {
+      return;
     }
+    var position = (percentage / 100) * (frames.length - 1);
+    frames.forEach(function fade(frame, index) {
+      frame.style.opacity = String(Math.max(0, 1 - Math.abs(position - index)));
+    });
   }
 
   function initCompare() {
@@ -301,6 +336,62 @@
     }
   }
 
+  function updateSpendingScrub(percentage, items, inset) {
+    var clamped = Math.max(0, Math.min(100, percentage));
+    var fill = root.document.getElementById('spendingTrackFill');
+    if (fill) {
+      var span = 100 - inset * 2;
+      var fillPercent = span > 0 ? Math.max(0, Math.min(100, ((clamped - inset) / span) * 100)) : 0;
+      fill.style.width = fillPercent + '%';
+    }
+    items.forEach(function grow(item) {
+      var position = Number(item.dataset.position);
+      var target = Number(item.dataset.targetHeight);
+      var bar = item.querySelector('.spending-bar');
+      if (!bar) {
+        return;
+      }
+      var local = Math.max(0, Math.min(1, (clamped - position + 14) / 22));
+      bar.style.height = (local * target) + '%';
+      item.classList.toggle('is-grown', local > .92);
+    });
+    var nodes = root.document.querySelectorAll('#spendingTrack .spending-node');
+    nodes.forEach(function toggleNode(node) {
+      node.classList.toggle('is-passed', clamped >= Number(node.dataset.position) - 4);
+    });
+  }
+
+  function initSpendingTimeline() {
+    var wrap = root.document.getElementById('spendingTimeline');
+    var chart = root.document.getElementById('spendingChart');
+    if (!wrap || !chart) {
+      return;
+    }
+    var items = Array.from(chart.querySelectorAll('.spending-item'));
+    if (!items.length) {
+      return;
+    }
+    var inset = 50 / items.length;
+
+    var dragging = false;
+    function move(event) {
+      if (!dragging) {
+        return;
+      }
+      var rect = wrap.getBoundingClientRect();
+      var percentage = ((event.clientX - rect.left) / rect.width) * 100;
+      updateSpendingScrub(percentage, items, inset);
+    }
+    wrap.addEventListener('pointerdown', function start(event) {
+      dragging = true;
+      move(event);
+    });
+    wrap.addEventListener('pointermove', move);
+    wrap.addEventListener('pointerup', function stop() { dragging = false; });
+    wrap.addEventListener('pointercancel', function stop() { dragging = false; });
+    root.document.addEventListener('pointerup', function stopOutside() { dragging = false; });
+  }
+
   function init(options) {
     var settings = options || {};
     scroller = settings.scroller || root.document.getElementById('appScroller');
@@ -316,6 +407,7 @@
     }
 
     initCompare();
+    initSpendingTimeline();
     initScrollTracking();
     activate('s1');
   }

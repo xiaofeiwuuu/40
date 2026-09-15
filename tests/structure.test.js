@@ -41,3 +41,11 @@ test('每屏都暴露主要交互钩子', () => {
     assert.match(html, new RegExp(`data-hook=["']${hook}["']`));
   }
 });
+
+test('第九屏以上滑提示代替答题按钮', () => {
+  const match = html.match(/<section class="screen screen-puzzle"[\s\S]*?<section class="screen screen-inheritance"/);
+  assert.ok(match);
+  assert.match(match[0], /class="scroll-hint"[^>]*>向上滑动</);
+  assert.doesNotMatch(match[0], /data-open-quiz="quiz2"/);
+  assert.doesNotMatch(match[0], />答题继续</);
+});

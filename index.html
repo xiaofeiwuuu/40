@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#17120f">
   <meta name="description" content="翻开40年——一位老党员40本台历里的家国变迁">
   <title>翻开40年</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/scenes.css">
@@ -89,15 +90,17 @@
           <p class="eyebrow archive-reveal">初心 · 根脉</p>
           <h2 id="s3Title" class="display-title archive-reveal">笔从未停歇</h2>
         </div>
-        <figure class="film-frame archive-reveal">
-          <img data-src="assets/video/posters/s3-intro.jpg" alt="陈治国接受采访的视频画面" width="960" height="540">
-          <figcaption>INTERVIEW / 2026</figcaption>
-          <button class="media-play" type="button" data-hook="intro-video" data-open-video="assets/video/s3-intro.mp4" data-poster="assets/video/posters/s3-intro.jpg" aria-label="播放陈治国自我介绍采访视频">
-            <span aria-hidden="true">▶</span><b>听他讲起这40年</b>
-          </button>
-        </figure>
-        <blockquote class="record-quote archive-reveal">1987年正月初一，他在第一本台历上写下：“新的一年，希望日子越过越好。”40年，14600多个日夜，他的笔从未停歇。</blockquote>
-        <button class="next-button" type="button" data-go="s4" aria-label="继续阅读告别煤油灯">继续 <span>↓</span></button>
+        <div class="doc-split">
+          <figure class="film-frame film-frame-portrait archive-reveal">
+            <img data-src="assets/video/posters/s3-intro.jpg" alt="陈治国接受采访的视频画面" width="960" height="540">
+            <figcaption>INTERVIEW / 2026</figcaption>
+            <button class="media-play media-play-compact" type="button" data-hook="intro-video" data-open-video="assets/video/s3-intro.mp4" data-poster="assets/video/posters/s3-intro.jpg" aria-label="播放陈治国自我介绍采访视频">
+              <span aria-hidden="true">▶</span>
+            </button>
+          </figure>
+          <blockquote class="record-quote" id="s3Quote"><span>1987年正月初一，他在第一本台历上写下：“新的一年，希望日子越过越好。”40年，14600多个日夜，他的笔从未停歇。</span></blockquote>
+        </div>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-electric" id="s4" data-screen="4" aria-labelledby="s4Title">
@@ -107,22 +110,20 @@
           <h2 id="s4Title" class="display-title archive-reveal">家里亮起电灯</h2>
         </div>
         <div class="light-compare archive-reveal" id="lightCompare" data-hook="light-compare">
-          <div class="compare-layer compare-dark">
-            <div class="oil-lamp" aria-hidden="true"><i></i><b></b></div>
-            <span>煤油灯下</span>
+          <div class="compare-stage" id="compareStage">
+            <img class="compare-frame" data-src="assets/images/scenes/s4-lamp-dim.webp" alt="煤油灯灯光微弱" width="800" height="533">
+            <img class="compare-frame" data-src="assets/images/scenes/s4-lamp.webp" alt="煤油灯下的昏暗土屋" width="800" height="533">
+            <img class="compare-frame" data-src="assets/images/scenes/s4-bulb-off.webp" alt="正规线路装好，灯还没亮" width="800" height="533">
+            <img class="compare-frame" data-src="assets/images/scenes/s4-bulb.webp" alt="通电后明亮的农舍" width="800" height="533">
           </div>
-          <div class="compare-layer compare-light" id="lightLayer">
-            <img data-src="assets/images/records/s4-1987.jpg" alt="1987年7月14日电工安装电路的台历原稿" width="1600" height="900">
-            <span>电灯亮起</span>
-          </div>
-          <button class="compare-handle" id="lightHandle" type="button" aria-label="拖动查看通电前后对比"><i></i></button>
+          <button class="compare-handle" id="lightHandle" type="button" aria-label="拖动查看从煤油灯到电灯的渐变过程"><i></i></button>
           <p>左右拖动</p>
         </div>
-        <blockquote class="record-quote short-quote archive-reveal">1987年7月14日，特请张公电管所管电员王云述来家，在土墙上安好正规线路、插座和开关，正式安全用电。</blockquote>
+        <blockquote class="record-quote short-quote" id="s4Quote"><span>1987年7月14日，特请张公电管所管电员王云述来家，在土墙上安好正规线路、插座和开关，正式安全用电。</span></blockquote>
         <div class="scene-actions archive-reveal">
-          <button class="secondary-button" type="button" data-open-image="assets/images/records/s4-1987.jpg" data-alt="1987年7月14日台历原稿">查看原稿</button>
-          <button class="next-button" type="button" data-go="s5">继续 <span>↓</span></button>
+          <button class="text-link" type="button" data-open-image="assets/images/records/s4-1987.jpg" data-alt="1987年7月14日台历原稿">查看原稿</button>
         </div>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-television" id="s5" data-screen="5" aria-labelledby="s5Title">
@@ -131,20 +132,16 @@
           <p class="eyebrow archive-reveal">1990 · 第一台电视机</p>
           <h2 id="s5Title" class="display-title archive-reveal">方寸荧屏，看见远方</h2>
         </div>
-        <div class="tv-scene archive-reveal">
-          <div class="tv-antenna" aria-hidden="true"></div>
-          <div class="tv-shell">
-            <img data-src="assets/video/posters/s5-tv.jpg" alt="陈治国讲述购买第一台电视机的视频画面" width="960" height="540">
-            <div class="scanlines" aria-hidden="true"></div>
-            <button class="tv-play" type="button" data-hook="tv-video" data-open-video="assets/video/s5-tv.mp4" data-poster="assets/video/posters/s5-tv.jpg" aria-label="播放陈治国讲述第一台电视机的采访视频"><span>▶</span></button>
-          </div>
-          <p>点击电视 · 播放采访</p>
+        <div class="night-scene archive-reveal" id="nightScene" data-hook="night-scene">
+          <img data-src="assets/images/scenes/s5-night.webp" alt="1990年夜里，一家人围坐在院子里看电视" width="900" height="533">
+          <button class="tv-hotspot" type="button" data-open-image="assets/images/records/s5-1990.jpg" data-alt="1990年4月1日购买电视机台历原稿" aria-label="点击电视屏幕，查看台历原稿"></button>
+          <button class="video-badge" type="button" data-hook="tv-video" data-open-video="assets/video/s5-tv.mp4" data-poster="assets/video/posters/s5-tv.jpg" aria-label="播放陈治国讲述第一台电视机的采访视频">
+            <span class="video-badge-icon" aria-hidden="true">▶</span>
+            <span class="video-badge-label">听陈爷爷讲当年的故事</span>
+          </button>
         </div>
-        <blockquote class="record-quote dark-quote archive-reveal">1990年4月1日，今日买上海牌的14英寸黑白电视机一部花费387元。</blockquote>
-        <div class="scene-actions archive-reveal">
-          <button class="secondary-button light-button" type="button" data-open-image="assets/images/records/s5-1990.jpg" data-alt="1990年4月1日购买电视机台历原稿">查看原稿</button>
-          <button class="next-button light-button" type="button" data-go="s6">继续 <span>↓</span></button>
-        </div>
+        <blockquote class="record-quote dark-quote" id="s5Quote"><span>1990年4月1日，今日买上海牌的14英寸黑白电视机一部花费387元。</span></blockquote>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-tax" id="s6" data-screen="6" aria-labelledby="s6Title">
@@ -153,17 +150,19 @@
           <p class="eyebrow archive-reveal">2006 · 农业税取消</p>
           <h2 id="s6Title" class="display-title archive-reveal">两道红线，划过千年</h2>
         </div>
-        <button class="tax-record archive-reveal" type="button" data-open-image="assets/images/records/s6-2006.jpg" data-alt="2006年1月1日取消农业税台历原稿">
-          <img data-src="assets/images/records/s6-2006.jpg" alt="2006年1月1日取消农业税台历原稿" width="1600" height="900">
-          <i class="red-stroke stroke-one" aria-hidden="true"></i>
-          <i class="red-stroke stroke-two" aria-hidden="true"></i>
-          <span>点击查看原稿</span>
-        </button>
-        <blockquote class="record-quote ceremony-quote archive-reveal">2006年1月1日，看新闻，取消农民农业税！</blockquote>
-        <div class="scene-actions archive-reveal">
-          <button class="secondary-button light-button" type="button" data-hook="tax-video" data-open-video="assets/video/s6-tax.mp4" data-poster="assets/video/posters/s6-tax.jpg">播放采访</button>
-          <button class="primary-button gold-button" type="button" data-open-quiz="quiz1">答题继续</button>
+        <div class="tax-scene archive-reveal">
+          <img data-src="assets/images/scenes/s6-calendar.webp" alt="2006年1月1日台历，取消农民农业税几个字被红线标出，旁边有麦穗图案" width="800" height="533">
+          <i class="tax-glow" aria-hidden="true"></i>
         </div>
+        <blockquote class="record-quote ceremony-quote" id="s6Quote"><span>2006年1月1日，看新闻，取消农民农业税！</span></blockquote>
+        <div class="scene-actions archive-reveal">
+          <button class="text-link" type="button" data-open-image="assets/images/records/s6-2006.jpg" data-alt="2006年1月1日取消农业税台历原稿">查看原稿</button>
+          <button class="play-chip" type="button" data-hook="tax-video" data-open-video="assets/video/s6-tax.mp4" data-poster="assets/video/posters/s6-tax.jpg" aria-label="播放陈治国讲述农业税取消视频">
+            <span class="play-chip-icon" aria-hidden="true">▶</span>
+            <span>播放采访</span>
+          </button>
+        </div>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-life" id="s7" data-screen="7" aria-labelledby="s7Title">
@@ -176,12 +175,11 @@
         <div class="life-carousel archive-reveal" aria-label="四则生活记录">
           <div class="life-track" id="lifeTrack" data-hook="life-cards"></div>
         </div>
-        <div class="carousel-controls archive-reveal">
-          <button id="lifePrev" type="button" aria-label="上一则记录">←</button>
-          <p><span id="lifeCurrent">1</span> / 4</p>
-          <button id="lifeNext" type="button" aria-label="下一则记录">→</button>
+        <div class="carousel-meta archive-reveal">
+          <p class="carousel-count"><span id="lifeCurrent">1</span> / 4</p>
+          <p class="carousel-hint">点击图片查看原稿</p>
         </div>
-        <button class="next-button" type="button" data-go="s8">继续 <span>↓</span></button>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-spending" id="s8" data-screen="8" aria-labelledby="s8Title">
@@ -191,9 +189,14 @@
           <h2 id="s8Title" class="display-title archive-reveal">腰包越来越鼓</h2>
           <p class="subtitle archive-reveal">台历记录的年货开支</p>
         </div>
-        <div class="spending-chart archive-reveal" id="spendingChart" data-hook="spending-chart" aria-label="1990至2020年四次年货开支记录"></div>
-        <p class="chart-note archive-reveal">金额为当年台历所记名义支出 · 点击柱形查看原稿</p>
-        <button class="next-button" type="button" data-go="s9">继续 <span>↓</span></button>
+        <div class="spending-timeline archive-reveal" id="spendingTimeline" data-hook="spending-chart" aria-label="1990至2020年四次年货开支记录，左右滑动查看">
+          <div class="spending-chart" id="spendingChart">
+            <div class="spending-track" id="spendingTrack"><i class="spending-track-fill" id="spendingTrackFill"></i></div>
+          </div>
+        </div>
+        <p class="spending-detail" id="spendingDetail" aria-live="polite"></p>
+        <p class="chart-note archive-reveal">滑动时间轴，柱状图随之生长 · 点击台历角查看当年账目</p>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-puzzle" id="s9" data-screen="9" aria-labelledby="s9Title">
@@ -202,11 +205,13 @@
           <p class="eyebrow archive-reveal">一块一块，把日子拼完整</p>
           <h2 id="s9Title" class="display-title archive-reveal">拼出好日子</h2>
         </div>
-        <div class="puzzle-board archive-reveal" id="puzzleBoard" data-hook="puzzle-board" aria-label="九宫格拼图"></div>
+        <div class="puzzle-stage archive-reveal">
+          <div class="puzzle-board" id="puzzleBoard" data-hook="puzzle-board" aria-label="九宫格拼图"></div>
+          <p class="puzzle-success" id="puzzleSuccess" role="status" hidden>好日子，是拼出来的。</p>
+        </div>
         <p class="puzzle-hint" id="puzzleHint">拖动拼图，或依次点击两块进行交换</p>
-        <p class="puzzle-success" id="puzzleSuccess" role="status" hidden>好日子，是拼出来的。</p>
         <button class="skip-puzzle" id="skipPuzzle" type="button" hidden>跳过互动</button>
-        <button class="primary-button" type="button" data-open-quiz="quiz2">答题继续</button>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-inheritance" id="s10" data-screen="10" aria-labelledby="s10Title">
@@ -215,17 +220,11 @@
           <p class="eyebrow archive-reveal">传承 · 接力</p>
           <h2 id="s10Title" class="display-title archive-reveal">记录不会停下</h2>
         </div>
-        <div class="inheritance-visual archive-reveal">
-          <div class="portrait-old">
-            <img data-src="assets/images/donation/03.jpg" alt="陈治国坐在40本台历旁" width="1600" height="900">
-            <span>台历</span>
-          </div>
-          <svg class="inheritance-line" viewBox="0 0 160 70" aria-hidden="true"><path d="M4 48c26-60 45 35 75-5s45 27 77-20"/></svg>
-          <div class="phone-record" aria-hidden="true"><i>9月28日</i><b></b><b></b><b></b><span>手机</span></div>
+        <div class="legacy-scene archive-reveal">
+          <img data-src="assets/images/scenes/s10-legacy-handoff.webp" alt="陈治国伏案写台历，女儿陈芳用手机拍照记录，两代人之间一条光带相连，光带上浮现文字：我年纪大了，眼睛花了，以后记录的事，就交给女儿陈芳了。" width="1536" height="1024">
         </div>
         <div class="inheritance-quotes">
-          <blockquote class="record-quote dark-quote archive-reveal">我年纪大了，眼睛花了，以后记录的事，就交给女儿陈芳了。</blockquote>
-          <blockquote class="daughter-quote archive-reveal">“父亲用台历，我用手机。方式不同，但初心一样。时代在变，记录的方式在变，但我们爱党、信党、跟党走的初心永远不会变。”<cite>——陈芳</cite></blockquote>
+          <blockquote class="record-quote daughter-quote"><span>“父亲用台历，我用手机。方式不同，但初心一样。时代在变，记录的方式在变，但我们爱党、信党、跟党走的初心永远不会变。”</span><cite>——陈芳</cite></blockquote>
         </div>
         <button class="audio-button archive-reveal" id="audioButton" data-hook="legacy-audio" type="button" aria-pressed="false">
           <span class="audio-icon" aria-hidden="true">▶</span>
@@ -233,7 +232,7 @@
           <span class="audio-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
         </button>
         <audio id="inheritanceAudio" preload="metadata" src="assets/audio/s10.mp3"></audio>
-        <button class="next-button light-button" type="button" data-go="s11">继续 <span>↓</span></button>
+        <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-finale" id="s11" data-screen="11" aria-labelledby="s11Title">
@@ -250,7 +249,7 @@
           <button class="donation-photo photo-detail" type="button" data-open-image="assets/images/donation/06.jpg" data-alt="收藏证书特写"><img data-src="assets/images/donation/06.jpg" alt="收藏证书特写" width="1600" height="900"></button>
           <div class="final-seal" aria-hidden="true">入藏</div>
         </div>
-        <button class="primary-button gold-button" id="openPoster" data-hook="poster-create" type="button">生成我的感悟海报</button>
+        <button class="primary-button gold-button opening-button" id="openPoster" data-hook="poster-create" type="button">生成我的感悟海报</button>
         <p class="final-date">1987—2026 · 四十年，四十本台历</p>
       </section>
     </div>
@@ -258,10 +257,8 @@
 
   <div class="modal-layer" id="mediaDialog" role="dialog" aria-modal="true" aria-labelledby="mediaTitle" hidden>
     <div class="modal-panel media-panel">
-      <div class="modal-head">
-        <h2 id="mediaTitle">影像档案</h2>
-        <button class="modal-close" type="button" data-close-modal aria-label="关闭影像档案">×</button>
-      </div>
+      <h2 id="mediaTitle" class="sr-only">影像档案</h2>
+      <button class="modal-close modal-close-float" type="button" data-close-modal aria-label="关闭">×</button>
       <div class="media-content" id="mediaContent"></div>
       <p class="modal-status" id="mediaStatus" role="status"></p>
     </div>
@@ -274,10 +271,9 @@
   <div class="modal-layer" id="posterDialog" role="dialog" aria-modal="true" aria-labelledby="posterTitle" hidden>
     <div class="modal-panel poster-panel">
       <div class="modal-head">
-        <div><p>MY ARCHIVE NOTE</p><h2 id="posterTitle">选择一句，留给时间</h2></div>
+        <div><p>MY ARCHIVE NOTE</p><h2 id="posterTitle">留一句话，给时间</h2></div>
         <button class="modal-close" type="button" data-close-modal aria-label="关闭感悟海报">×</button>
       </div>
-      <div class="poster-choices" id="posterChoices"></div>
       <canvas id="posterCanvas" width="640" height="960" aria-label="我的翻开40年感悟海报"></canvas>
       <p class="poster-qr-note" id="posterQrNote"></p>
       <div class="poster-actions">

@@ -25,6 +25,25 @@
     return next;
   }
 
+  function newlyCorrectSlots(before, after, candidateSlots) {
+    if (!Array.isArray(before) || !Array.isArray(after) || !Array.isArray(candidateSlots)) {
+      return [];
+    }
+    return candidateSlots.filter(function becameCorrect(slot) {
+      return before[slot] !== slot && after[slot] === slot;
+    });
+  }
+
+  function nextCompletionFrameIndex(currentIndex, frameCount) {
+    var count = Math.max(1, Math.floor(Number(frameCount) || 0));
+    var current = Math.max(0, Math.floor(Number(currentIndex) || 0));
+    return (current + 1) % count;
+  }
+
+  function shouldCycleCompletionFrames(activeScreenId, completionReady) {
+    return activeScreenId === 's9' && Boolean(completionReady);
+  }
+
   function createShuffledOrder(random) {
     var rng = typeof random === 'function' ? random : Math.random;
     var order = solvedOrder.slice();
@@ -48,6 +67,7 @@
     var dragInstances = [];
     var destroyed = false;
     var skipTimer = null;
+    var completionAnnounced = false;
 
     if (!board) {
       return { destroy: function noop() {} };
@@ -63,9 +83,13 @@
     }
 
     function markSolved(wasSkipped) {
+      if (completionAnnounced) {
+        return;
+      }
+      completionAnnounced = true;
       if (success) {
         success.hidden = false;
-        success.textContent = wasSkipped ? '完整的40年，已经呈现在眼前。' : '好日子，是拼出来的。';
+        success.textContent = '好日子，是拼出来的。';
       }
       if (hint) {
         hint.hidden = true;
@@ -74,8 +98,24 @@
         skipButton.hidden = true;
       }
       if (typeof settings.onSolved === 'function') {
-        settings.onSolved(Boolean(wasSkipped));
+        setTimeout(function announceCompletion() {
+          settings.onSolved(Boolean(wasSkipped));
+        }, wasSkipped ? 0 : 260);
       }
+    }
+
+    function announceCorrectSlots(slots) {
+      slots.forEach(function announce(slot, index) {
+        setTimeout(function showSnap() {
+          var piece = board.querySelector('[data-slot="' + slot + '"]');
+          if (piece) {
+            piece.classList.add('is-correct-pop');
+          }
+          if (typeof settings.onCorrectPlacement === 'function') {
+            settings.onCorrectPlacement({ slot: slot, piece: order[slot], element: piece });
+          }
+        }, index * 90);
+      });
     }
 
     function findNearestSlot(piece, slotRects) {
@@ -104,10 +144,12 @@
         return;
       }
 
-      var pieces = Array.from(board.querySelectorAll('.puzzle-piece'));
-      var slotRects = pieces.map(function getRect(piece) { return piece.getBoundingClientRect(); });
+      var allPieces = Array.from(board.querySelectorAll('.puzzle-piece'));
+      var pieces = Array.from(board.querySelectorAll('.puzzle-piece:not(:disabled)'));
+      var slotRects = allPieces.map(function getRect(piece) { return piece.getBoundingClientRect(); });
 
-      pieces.forEach(function makeDraggable(piece, slotIndex) {
+      pieces.forEach(function makeDraggable(piece) {
+        var slotIndex = Number(piece.dataset.slot);
         var instances = Draggable.create(piece, {
           type: 'x,y',
           bounds: board,
@@ -122,10 +164,15 @@
           },
           onDragEnd: function onDragEnd() {
             var targetIndex = findNearestSlot(piece, slotRects);
+            var targetIsLocked = order[targetIndex] === targetIndex && targetIndex !== slotIndex;
+            var nextOrder = targetIndex === slotIndex || targetIsLocked
+              ? order
+              : swap(order, slotIndex, targetIndex);
+            var correctSlots = newlyCorrectSlots(order, nextOrder, [slotIndex, targetIndex]);
             board.classList.remove('is-dragging');
-            order = targetIndex === slotIndex ? order : swap(order, slotIndex, targetIndex);
+            order = nextOrder;
             setTimeout(function allowClickAgain() { delete piece.dataset.wasDragged; }, 80);
-            render();
+            render(correctSlots, false);
           }
         });
         dragInstances = dragInstances.concat(instances || []);
@@ -153,12 +200,15 @@
         return;
       }
 
-      order = swap(order, selectedIndex, slotIndex);
+      var previousOrder = order;
+      var nextOrder = swap(order, selectedIndex, slotIndex);
+      var correctSlots = newlyCorrectSlots(previousOrder, nextOrder, [selectedIndex, slotIndex]);
+      order = nextOrder;
       selectedIndex = null;
-      render();
+      render(correctSlots, false);
     }
 
-    function render() {
+    function render(correctSlots, wasSkipped) {
       if (destroyed) {
         return;
       }
@@ -170,18 +220,24 @@
         var row = Math.floor(pieceNumber / 3);
         var piece = document.createElement('button');
         piece.type = 'button';
-        piece.className = 'puzzle-piece';
+        piece.className = 'puzzle-piece' + (pieceNumber === slotIndex ? ' is-locked' : '');
         piece.dataset.slot = String(slotIndex);
         piece.style.backgroundPosition = (column * 50) + '% ' + (row * 50) + '%';
-        piece.setAttribute('aria-label', '拼图第' + (slotIndex + 1) + '格，图块' + (pieceNumber + 1));
+        piece.setAttribute('aria-label', '拼图第' + (slotIndex + 1) + '格，图块' + (pieceNumber + 1) + (pieceNumber === slotIndex ? '，已拼对' : ''));
         piece.setAttribute('aria-pressed', 'false');
         piece.innerHTML = '<span>' + String(slotIndex + 1).padStart(2, '0') + '</span>';
-        piece.addEventListener('click', handlePieceClick);
+        if (pieceNumber === slotIndex) {
+          piece.disabled = true;
+        } else {
+          piece.addEventListener('click', handlePieceClick);
+        }
         board.appendChild(piece);
       });
 
+      announceCorrectSlots(correctSlots || []);
+
       if (isSolved(order)) {
-        markSolved(false);
+        markSolved(Boolean(wasSkipped));
       } else {
         requestAnimationFrame(enableDragging);
       }
@@ -189,8 +245,7 @@
 
     function skip() {
       order = solvedOrder.slice();
-      render();
-      markSolved(true);
+      render([], true);
     }
 
     function startSkipTimer() {
@@ -212,7 +267,7 @@
       }
     }
 
-    render();
+    render([], false);
 
     return {
       destroy: function destroy() {
@@ -233,6 +288,9 @@
   return {
     createShuffledOrder: createShuffledOrder,
     swap: swap,
+    newlyCorrectSlots: newlyCorrectSlots,
+    nextCompletionFrameIndex: nextCompletionFrameIndex,
+    shouldCycleCompletionFrames: shouldCycleCompletionFrames,
     isSolved: isSolved,
     mount: mount
   };

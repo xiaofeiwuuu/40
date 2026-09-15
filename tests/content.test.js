@@ -23,9 +23,37 @@ test('采访标签和答题跳转准确', () => {
   assert.equal(content.quizzes.quiz2.next, 's10');
 });
 
+test('两道问答都用弹窗卡片底图并在答对一秒后关闭', () => {
+  const quiz1 = content.quizzes.quiz1;
+  const quiz2 = content.quizzes.quiz2;
+
+  assert.equal(quiz1.autoOpenOn, 's7');
+  assert.equal(quiz1.image, 'assets/images/scenes/quiz1-agricultural-tax.webp');
+  assert.equal(quiz1.correctCloseDelayMs, 1000);
+  assert.equal(quiz2.correctCloseDelayMs, 1000);
+});
+
+test('脱贫攻坚答题在第十屏自动打开并使用完整解析', () => {
+  const quiz = content.quizzes.quiz2;
+  assert.equal(quiz.autoOpenOn, 's10');
+  assert.equal(quiz.mandatory, true);
+  assert.equal(quiz.image, 'assets/images/scenes/quiz2-poverty-relief.webp');
+  assert.equal(quiz.explanation, '2021年2月25日，习近平总书记在全国脱贫攻坚总结表彰大会上庄严宣告：我国脱贫攻坚战取得了全面胜利，现行标准下9899万农村贫困人口全部脱贫，832个贫困县全部摘帽，12.8万个贫困村全部出列，区域性整体贫困得到解决，完成了消除绝对贫困的艰巨任务，创造了又一个彪炳史册的人间奇迹。他同时强调，要切实做好巩固拓展脱贫攻坚成果同乡村振兴有效衔接各项工作，让脱贫基础更加稳固、成效更可持续。');
+  assert.deepEqual(quiz.emphasis, ['2021', '2', '25', '9899', '832', '12.8']);
+});
+
 test('生活记录和年货开支均为四组', () => {
   assert.equal(content.lifeRecords.length, 4);
   assert.deepEqual(content.spending.map((item) => item.amount), [16, 79, 489, 1640]);
+});
+
+test('第九屏拼图完成后有两帧行人画面', () => {
+  const s9 = content.screens.find((screen) => screen.id === 's9');
+  assert.equal(s9.puzzleImage, 'assets/images/scenes/s9-good-life-base.webp');
+  assert.deepEqual(s9.completionFrames, [
+    'assets/images/scenes/s9-good-life-walk-a.webp',
+    'assets/images/scenes/s9-good-life-walk-b.webp'
+  ]);
 });
 
 test('四十个台历年份连续', () => {
@@ -33,4 +61,3 @@ test('四十个台历年份连续', () => {
   assert.equal(content.calendarYears[0], 1987);
   assert.equal(content.calendarYears.at(-1), 2026);
 });
-

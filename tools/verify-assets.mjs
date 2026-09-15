@@ -75,6 +75,15 @@ const recordDirectory = join(assetsRoot, 'images', 'records');
 const donationDirectory = join(assetsRoot, 'images', 'donation');
 const posterDirectory = join(assetsRoot, 'video', 'posters');
 const videoDirectory = join(assetsRoot, 'video');
+const puzzleImages = [
+  's9-good-life-base.webp',
+  's9-good-life-walk-a.webp',
+  's9-good-life-walk-b.webp'
+].map((name) => join(assetsRoot, 'images', 'scenes', name));
+const quizImages = [
+  'quiz1-agricultural-tax.webp',
+  'quiz2-poverty-relief.webp'
+].map((name) => join(assetsRoot, 'images', 'scenes', name));
 const calendarNames = Array.from({ length: 40 }, (_, index) => `${1987 + index}.jpg`);
 const recordNames = [
   's4-1987.jpg', 's5-1990.jpg', 's6-2006.jpg',
@@ -94,10 +103,18 @@ calendarNames.forEach((name) => identifyImage(join(calendarDirectory, name), 480
 recordNames.forEach((name) => identifyImage(join(recordDirectory, name), 1600));
 donationNames.forEach((name) => identifyImage(join(donationDirectory, name), 1600));
 posterNames.forEach((name) => identifyImage(join(posterDirectory, name), 960));
+puzzleImages.forEach((path) => {
+  assert(existsSync(path), `screen 9 puzzle image is missing: ${relative(projectRoot, path)}`);
+  identifyImage(path, 1600);
+});
+quizImages.forEach((path) => {
+  assert(existsSync(path), `quiz image is missing: ${relative(projectRoot, path)}`);
+  identifyImage(path, 1600);
+});
 videoNames.forEach((name) => inspectVideo(join(videoDirectory, name)));
 
 const files = walk(assetsRoot);
-const images = files.filter((path) => ['.jpg', '.jpeg', '.png'].includes(extname(path).toLowerCase()));
+const images = files.filter((path) => ['.jpg', '.jpeg', '.png', '.webp'].includes(extname(path).toLowerCase()));
 const videos = files.filter((path) => extname(path).toLowerCase() === '.mp4');
 const imageBytes = totalBytes(images);
 const videoBytes = totalBytes(videos);
