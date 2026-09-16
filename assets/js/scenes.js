@@ -144,6 +144,32 @@
       });
     }
 
+    if (id === 's1') {
+      gsap.fromTo(screen.querySelector('.opening-title'), {
+        letterSpacing: '.14em'
+      }, {
+        letterSpacing: '.05em',
+        duration: 1.15,
+        delay: .18,
+        ease: 'power2.out',
+        clearProps: 'letterSpacing'
+      });
+    }
+
+    if (id === 's2') {
+      gsap.fromTo(screen.querySelector('.calendar-flipbook'), {
+        rotationY: -10,
+        scale: .93
+      }, {
+        rotationY: 0,
+        scale: 1,
+        duration: .72,
+        delay: .72,
+        ease: 'back.out(1.15)',
+        clearProps: 'rotationY,scale'
+      });
+    }
+
     if (id === 's5') {
       gsap.fromTo(screen.querySelector('.night-scene'), {
         filter: 'brightness(.35)'
@@ -182,6 +208,35 @@
     }
   }
 
+  function openQuiz1WhenSettled() {
+    var settleTimer = null;
+
+    function fireWhenQuiet() {
+      settleTimer = null;
+      if (scroller) {
+        scroller.removeEventListener('scroll', onScroll);
+      }
+      // Bail if the user has already swiped past s7 by the time the
+      // scroll-snap finally settles - the quiz would pop on the wrong screen.
+      if (currentId !== 's7') {
+        return;
+      }
+      root.document.dispatchEvent(new root.CustomEvent('quiz:auto-open', { detail: { key: 'quiz1' } }));
+    }
+
+    function onScroll() {
+      root.clearTimeout(settleTimer);
+      settleTimer = root.setTimeout(fireWhenQuiet, 160);
+    }
+
+    if (!scroller) {
+      root.setTimeout(fireWhenQuiet, 450);
+      return;
+    }
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
   function activate(screenId) {
     var screen = root.document.getElementById(screenId);
     if (!screen || currentId === screenId) {
@@ -215,16 +270,10 @@
       visited.add(screenId);
       animateScreen(screen);
       if (screenId === 's7' && typeof root.CustomEvent === 'function') {
-        // Spec calls for the quiz to pop mid-transition from s6 into s7 -
-        // give the scroll-snap settle a beat before it appears.
-        root.setTimeout(function autoQuiz() {
-          root.document.dispatchEvent(new root.CustomEvent('quiz:auto-open', { detail: { key: 'quiz1' } }));
-        }, 450);
+        openQuiz1WhenSettled();
       }
-      if (screenId === 's10' && typeof root.CustomEvent === 'function') {
-        root.setTimeout(function autoPlayLegacyAudio() {
-          root.document.dispatchEvent(new root.CustomEvent('legacy-audio:auto-play'));
-        }, 450);
+      if (screenId === 's8') {
+        root.setTimeout(autoFillSpendingChart, 450);
       }
       if (screenId === 's11') {
         var posterButton = screen.querySelector('#openPoster');
@@ -246,6 +295,11 @@
     }
   }
 
+  var electricOn = false;
+  var lastComparePercentage = null;
+  var LIGHT_ON_THRESHOLD = 97;
+  var LIGHT_OFF_THRESHOLD = 92;
+
   function updateCompare(value) {
     var percentage = Math.max(0, Math.min(100, value));
     var frames = root.document.querySelectorAll('#compareStage .compare-frame');
@@ -256,6 +310,30 @@
     frames.forEach(function fade(frame, index) {
       frame.style.opacity = String(Math.max(0, 1 - Math.abs(position - index)));
     });
+
+    if (typeof root.CustomEvent === 'function') {
+      // Sliding to the right (toward the bulb) crackles with electricity,
+      // but only while the bulb isn't already fully lit - once "on", further
+      // rightward nudges (e.g. still easing toward 100) must not restart it.
+      if (!electricOn && lastComparePercentage !== null && percentage > lastComparePercentage) {
+        root.document.dispatchEvent(new root.CustomEvent('light:charging'));
+      }
+
+      // Only count the bulb as "on" once the handle is essentially all the
+      // way to the right, not just close to the last frame's crossfade
+      // midpoint - that left a visible gap before the ding actually fired.
+      if (!electricOn && percentage >= LIGHT_ON_THRESHOLD) {
+        electricOn = true;
+        root.document.dispatchEvent(new root.CustomEvent('light:charging:stop'));
+        root.document.dispatchEvent(new root.CustomEvent('light:on'));
+      } else if (electricOn && percentage < LIGHT_OFF_THRESHOLD) {
+        // A deliberate move back toward the kerosene side turns the bulb
+        // back off (re-arming the ding); a little hysteresis below the on
+        // threshold keeps a held, jittery finger from flickering the state.
+        electricOn = false;
+      }
+    }
+    lastComparePercentage = percentage;
   }
 
   function initCompare() {
@@ -278,14 +356,20 @@
         updateCompare(percentage);
         handle.style.left = Math.max(0, Math.min(100, percentage)) + '%';
       }
+      function stopDragging() {
+        dragging = false;
+        if (typeof root.CustomEvent === 'function') {
+          root.document.dispatchEvent(new root.CustomEvent('light:charging:stop'));
+        }
+      }
       compare.addEventListener('pointerdown', function start(event) {
         dragging = true;
         compare.setPointerCapture(event.pointerId);
         move(event);
       });
       compare.addEventListener('pointermove', move);
-      compare.addEventListener('pointerup', function stop() { dragging = false; });
-      compare.addEventListener('pointercancel', function stop() { dragging = false; });
+      compare.addEventListener('pointerup', stopDragging);
+      compare.addEventListener('pointercancel', stopDragging);
       return;
     }
 
@@ -300,6 +384,11 @@
       },
       onDrag: function reveal() {
         updateCompare(50 + (this.x / width) * 100);
+      },
+      onRelease: function stopCharging() {
+        if (typeof root.CustomEvent === 'function') {
+          root.document.dispatchEvent(new root.CustomEvent('light:charging:stop'));
+        }
       }
     });
   }
@@ -361,10 +450,9 @@
     });
   }
 
-  function initSpendingTimeline() {
-    var wrap = root.document.getElementById('spendingTimeline');
+  function autoFillSpendingChart() {
     var chart = root.document.getElementById('spendingChart');
-    if (!wrap || !chart) {
+    if (!chart) {
       return;
     }
     var items = Array.from(chart.querySelectorAll('.spending-item'));
@@ -373,23 +461,20 @@
     }
     var inset = 50 / items.length;
 
-    var dragging = false;
-    function move(event) {
-      if (!dragging) {
-        return;
-      }
-      var rect = wrap.getBoundingClientRect();
-      var percentage = ((event.clientX - rect.left) / rect.width) * 100;
-      updateSpendingScrub(percentage, items, inset);
+    if (reducedMotion || !root.gsap) {
+      updateSpendingScrub(100, items, inset);
+      return;
     }
-    wrap.addEventListener('pointerdown', function start(event) {
-      dragging = true;
-      move(event);
+
+    var state = { value: 0 };
+    root.gsap.to(state, {
+      value: 100,
+      duration: 3.6,
+      ease: 'power1.inOut',
+      onUpdate: function tick() {
+        updateSpendingScrub(state.value, items, inset);
+      }
     });
-    wrap.addEventListener('pointermove', move);
-    wrap.addEventListener('pointerup', function stop() { dragging = false; });
-    wrap.addEventListener('pointercancel', function stop() { dragging = false; });
-    root.document.addEventListener('pointerup', function stopOutside() { dragging = false; });
   }
 
   function init(options) {
@@ -407,7 +492,6 @@
     }
 
     initCompare();
-    initSpendingTimeline();
     initScrollTracking();
     activate('s1');
   }

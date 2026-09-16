@@ -80,6 +80,19 @@ const puzzleImages = [
   's9-good-life-walk-a.webp',
   's9-good-life-walk-b.webp'
 ].map((name) => join(assetsRoot, 'images', 'scenes', name));
+const generatedSceneBackgrounds = [
+  's1-time-monument.webp',
+  's2-calendar-river-years.webp',
+  's3-writing-archive-bg.webp',
+  's4-electric-light-bg.webp',
+  's5-television-night-bg.webp',
+  's6-tax-wheat-bg.webp',
+  's7-good-life-bg.webp',
+  's8-spending-new-year-bg.webp',
+  's9-village-life-bg.webp',
+  's10-legacy-room-bg.webp',
+  's11-archive-finale-bg.webp'
+].map((name) => join(assetsRoot, 'images', 'scenes', name));
 const quizImages = [
   'quiz1-agricultural-tax.webp',
   'quiz2-poverty-relief.webp'
@@ -105,6 +118,10 @@ donationNames.forEach((name) => identifyImage(join(donationDirectory, name), 160
 posterNames.forEach((name) => identifyImage(join(posterDirectory, name), 960));
 puzzleImages.forEach((path) => {
   assert(existsSync(path), `screen 9 puzzle image is missing: ${relative(projectRoot, path)}`);
+  identifyImage(path, 1600);
+});
+generatedSceneBackgrounds.forEach((path) => {
+  assert(existsSync(path), `generated scene background is missing: ${relative(projectRoot, path)}`);
   identifyImage(path, 1600);
 });
 quizImages.forEach((path) => {

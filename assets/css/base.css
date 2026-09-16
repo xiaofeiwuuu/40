@@ -24,8 +24,10 @@
   --touch: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --font-hei: "STHeiti", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-kai: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", "STSong", serif;
   color-scheme: light;
-  font-family: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", serif;
+  font-family: var(--font-hei);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -44,14 +46,14 @@ body {
 }
 
 html {
-  background: var(--night);
+  background: #2c0908;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-width: 320px;
   overflow: hidden;
-  background: var(--night);
+  background: #2c0908;
   color: var(--ink);
 }
 
@@ -118,7 +120,7 @@ p {
 
 .eyebrow {
   color: var(--archive-red);
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: var(--font-hei);
   font-size: clamp(.66rem, 2.7vw, .78rem);
   font-weight: 650;
   letter-spacing: .2em;
@@ -128,6 +130,7 @@ p {
 
 .display-title {
   color: var(--ink);
+  font-family: var(--font-hei);
   font-size: clamp(1.72rem, 7.5vw, 2.8rem);
   font-weight: 700;
   letter-spacing: .05em;

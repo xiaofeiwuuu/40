@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#17120f">
+  <meta name="theme-color" content="#2c0908">
   <meta name="description" content="翻开40年——一位老党员40本台历里的家国变迁">
   <title>翻开40年</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -36,7 +36,6 @@
   <main class="experience" id="experience" hidden>
     <header class="experience-chrome" aria-label="阅读进度与声音设置">
       <div class="progress-track" aria-hidden="true"><i id="progressBar"></i></div>
-      <p class="screen-counter"><span id="currentScreen">01</span><b>/</b>11</p>
       <button class="sound-toggle" id="soundToggle" type="button" aria-label="关闭提示音" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9v6h4l5 4V5L9 9H5Z"/><path class="sound-wave" d="M17 9c1.3 1.5 1.3 4.5 0 6M19.5 6.5c3.2 3.1 3.2 7.9 0 11"/></svg>
       </button>
@@ -45,13 +44,12 @@
     <div class="app-scroller" id="appScroller" tabindex="-1">
       <section class="screen screen-opening" id="s1" data-screen="1" aria-labelledby="s1Title">
         <div class="folio-corners" aria-hidden="true"></div>
-        <div class="s1-date archive-reveal">2026.09.28</div>
         <div class="opening-portrait archive-reveal">
           <img data-src="assets/images/donation/03.jpg" alt="陈治国伏案整理他记录了40年的台历" width="640" height="640">
         </div>
         <div class="opening-copy">
           <p class="eyebrow archive-reveal">一份献给时间的礼物</p>
-          <h1 id="s1Title" class="sr-only">写给时间的第一行</h1>
+          <h1 id="s1Title" class="opening-title archive-reveal"><span>40本台历</span><strong>见证变迁</strong></h1>
           <p class="opening-lead">
             <span>2026年9月28日，</span>
             <span>巴中市平昌县元山镇元山社区85岁老党员陈治国，</span>
@@ -68,15 +66,16 @@
       </section>
 
       <section class="screen screen-calendars" id="s2" data-screen="2" aria-labelledby="s2Title">
-        <div class="section-index"><span>01</span> 打开时间</div>
+        <div class="section-index light-index"><span>01</span> 打开时间</div>
         <div class="calendar-flipbook archive-reveal" id="calendarFlipbook" data-hook="calendar-flipbook" aria-label="1987年至2026年共40本台历封面，可左右滑动逐本查看，双击或点展开选择浏览全部"></div>
         <div class="calendar-expand" id="calendarExpand" aria-label="全部40本台历封面，左右滑动浏览，点击选择这一本" hidden></div>
         <div class="stack-hint-row archive-reveal">
-          <p class="stack-hint" id="stackHint">左右滑动看上一本/下一本，或展开浏览全部</p>
+          <p class="stack-hint" id="stackHint">左右滑动看上一张/下一张，或展开浏览全部</p>
           <button class="stack-expand-btn" id="stackExpandBtn" type="button" aria-pressed="false">展开选择</button>
         </div>
         <div class="calendar-count archive-reveal"><strong>40</strong><span>本<br>台历</span></div>
-        <div class="scene-copy scene-copy-center">
+        <audio id="calendarFlipSound" preload="auto" aria-hidden="true" src="assets/audio/s2-flip.mp3"></audio>
+        <div class="scene-copy scene-copy-center scene-heading-light">
           <p class="eyebrow archive-reveal">1987—2026</p>
           <h2 id="s2Title" class="display-title archive-reveal">翻开40年</h2>
           <p class="subtitle archive-reveal">一位老党员40本台历里的家国变迁</p>
@@ -85,27 +84,27 @@
       </section>
 
       <section class="screen screen-document" id="s3" data-screen="3" aria-labelledby="s3Title">
-        <div class="section-index"><span>02</span> 记录改变</div>
-        <div class="scene-heading">
+        <div class="section-index light-index"><span>02</span> 记录改变</div>
+        <div class="scene-heading scene-heading-light">
           <p class="eyebrow archive-reveal">初心 · 根脉</p>
           <h2 id="s3Title" class="display-title archive-reveal">笔从未停歇</h2>
         </div>
         <div class="doc-split">
           <figure class="film-frame film-frame-portrait archive-reveal">
-            <img data-src="assets/video/posters/s3-intro.jpg" alt="陈治国接受采访的视频画面" width="960" height="540">
+            <img data-src="assets/images/scenes/s3-writing-desk.webp" alt="陈治国伏案在台历上写下平凡的日子也值得珍惜" width="1536" height="1024">
             <figcaption>INTERVIEW / 2026</figcaption>
             <button class="media-play media-play-compact" type="button" data-hook="intro-video" data-open-video="assets/video/s3-intro.mp4" data-poster="assets/video/posters/s3-intro.jpg" aria-label="播放陈治国自我介绍采访视频">
               <span aria-hidden="true">▶</span>
             </button>
           </figure>
-          <blockquote class="record-quote" id="s3Quote"><span>1987年正月初一，他在第一本台历上写下：“新的一年，希望日子越过越好。”40年，14600多个日夜，他的笔从未停歇。</span></blockquote>
+          <blockquote class="record-quote paper-quote" id="s3Quote"><span>1987年正月初一，他在第一本台历上写下：“新的一年，希望日子越过越好。”40年，14600多个日夜，他的笔从未停歇。</span></blockquote>
         </div>
         <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-electric" id="s4" data-screen="4" aria-labelledby="s4Title">
-        <div class="section-index"><span>02</span> 记录改变</div>
-        <div class="scene-heading compact-heading">
+        <div class="section-index light-index"><span>02</span> 记录改变</div>
+        <div class="scene-heading compact-heading scene-heading-light">
           <p class="eyebrow archive-reveal">1987 · 告别煤油灯</p>
           <h2 id="s4Title" class="display-title archive-reveal">家里亮起电灯</h2>
         </div>
@@ -119,7 +118,9 @@
           <button class="compare-handle" id="lightHandle" type="button" aria-label="拖动查看从煤油灯到电灯的渐变过程"><i></i></button>
           <p>左右拖动</p>
         </div>
-        <blockquote class="record-quote short-quote" id="s4Quote"><span>1987年7月14日，特请张公电管所管电员王云述来家，在土墙上安好正规线路、插座和开关，正式安全用电。</span></blockquote>
+        <audio id="electricitySound" preload="auto" aria-hidden="true" src="assets/audio/s4-electricity.mp3"></audio>
+        <audio id="lightOnSound" preload="auto" aria-hidden="true" src="assets/audio/s4-ding.mp3"></audio>
+        <blockquote class="record-quote short-quote paper-quote" id="s4Quote"><span>1987年7月14日，特请张公电管所管电员王云述来家，在土墙上安好正规线路、插座和开关，正式安全用电。</span></blockquote>
         <div class="scene-actions archive-reveal">
           <button class="text-link" type="button" data-open-image="assets/images/records/s4-1987.jpg" data-alt="1987年7月14日台历原稿">查看原稿</button>
         </div>
@@ -140,8 +141,9 @@
             <span class="video-badge-label">听陈爷爷讲当年的故事</span>
           </button>
         </div>
-        <blockquote class="record-quote dark-quote" id="s5Quote"><span>1990年4月1日，今日买上海牌的14英寸黑白电视机一部花费387元。</span></blockquote>
+        <blockquote class="record-quote paper-quote" id="s5Quote"><span>1990年4月1日，今日买上海牌的14英寸黑白电视机一部花费387元。</span></blockquote>
         <p class="scroll-hint" aria-hidden="true">向上滑动</p>
+        <audio id="tvStaticSound" preload="auto" loop aria-hidden="true" src="assets/audio/s5-tv-static.mp3"></audio>
       </section>
 
       <section class="screen screen-tax" id="s6" data-screen="6" aria-labelledby="s6Title">
@@ -166,8 +168,8 @@
       </section>
 
       <section class="screen screen-life" id="s7" data-screen="7" aria-labelledby="s7Title">
-        <div class="section-index"><span>03</span> 日子变好</div>
-        <div class="scene-heading compact-heading">
+        <div class="section-index light-index"><span>03</span> 日子变好</div>
+        <div class="scene-heading compact-heading scene-heading-light">
           <p class="eyebrow archive-reveal">柴米油盐里的时代</p>
           <h2 id="s7Title" class="display-title archive-reveal">日子越过越好</h2>
           <p class="subtitle archive-reveal">四次落笔，四个普通家庭的生活切面</p>
@@ -183,25 +185,25 @@
       </section>
 
       <section class="screen screen-spending" id="s8" data-screen="8" aria-labelledby="s8Title">
-        <div class="section-index"><span>03</span> 日子变好</div>
-        <div class="scene-heading compact-heading">
+        <div class="section-index light-index"><span>03</span> 日子变好</div>
+        <div class="scene-heading compact-heading scene-heading-light">
           <p class="eyebrow archive-reveal">1990—2020</p>
           <h2 id="s8Title" class="display-title archive-reveal">腰包越来越鼓</h2>
           <p class="subtitle archive-reveal">台历记录的年货开支</p>
         </div>
-        <div class="spending-timeline archive-reveal" id="spendingTimeline" data-hook="spending-chart" aria-label="1990至2020年四次年货开支记录，左右滑动查看">
+        <div class="spending-timeline archive-reveal" id="spendingTimeline" data-hook="spending-chart" aria-label="1990至2020年四次年货开支记录">
           <div class="spending-chart" id="spendingChart">
             <div class="spending-track" id="spendingTrack"><i class="spending-track-fill" id="spendingTrackFill"></i></div>
           </div>
         </div>
         <p class="spending-detail" id="spendingDetail" aria-live="polite"></p>
-        <p class="chart-note archive-reveal">滑动时间轴，柱状图随之生长 · 点击台历角查看当年账目</p>
+        <p class="chart-note archive-reveal">点击台历时间查看当年账目</p>
         <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
       <section class="screen screen-puzzle" id="s9" data-screen="9" aria-labelledby="s9Title">
-        <div class="section-index"><span>03</span> 日子变好</div>
-        <div class="scene-heading compact-heading">
+        <div class="section-index light-index"><span>03</span> 日子变好</div>
+        <div class="scene-heading compact-heading scene-heading-light">
           <p class="eyebrow archive-reveal">一块一块，把日子拼完整</p>
           <h2 id="s9Title" class="display-title archive-reveal">拼出好日子</h2>
         </div>
@@ -211,6 +213,7 @@
         </div>
         <p class="puzzle-hint" id="puzzleHint">拖动拼图，或依次点击两块进行交换</p>
         <button class="skip-puzzle" id="skipPuzzle" type="button" hidden>跳过互动</button>
+        <audio id="puzzleClickSound" preload="auto" aria-hidden="true" src="assets/audio/s9-click.mp3"></audio>
         <p class="scroll-hint" aria-hidden="true">向上滑动</p>
       </section>
 
@@ -224,7 +227,7 @@
           <img data-src="assets/images/scenes/s10-legacy-handoff.webp" alt="陈治国伏案写台历，女儿陈芳用手机拍照记录，两代人之间一条光带相连，光带上浮现文字：我年纪大了，眼睛花了，以后记录的事，就交给女儿陈芳了。" width="1536" height="1024">
         </div>
         <div class="inheritance-quotes">
-          <blockquote class="record-quote daughter-quote"><span>“父亲用台历，我用手机。方式不同，但初心一样。时代在变，记录的方式在变，但我们爱党、信党、跟党走的初心永远不会变。”</span><cite>——陈芳</cite></blockquote>
+          <blockquote class="record-quote daughter-quote paper-quote"><span>“父亲用台历，我用手机。方式不同，但初心一样。时代在变，记录的方式在变，但我们爱党、信党、跟党走的初心永远不会变。”</span><cite>——陈芳</cite></blockquote>
         </div>
         <button class="audio-button archive-reveal" id="audioButton" data-hook="legacy-audio" type="button" aria-pressed="false">
           <span class="audio-icon" aria-hidden="true">▶</span>

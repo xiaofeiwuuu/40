@@ -153,6 +153,66 @@
     oscillator.stop(now + .15);
   }
 
+  function playFlipSound() {
+    var sound = byId('calendarFlipSound');
+    if (!sound || cueMuted) {
+      return;
+    }
+    try {
+      sound.currentTime = 0;
+    } catch (error) {
+      // Some browsers throw if metadata isn't ready yet - fine to just play from wherever.
+    }
+    sound.play().catch(function ignoreBlocked() {});
+  }
+
+  function startElectricitySound() {
+    var sound = byId('electricitySound');
+    // Rightward drag can fire this many times per gesture (once per
+    // pointermove) - if it's already playing, let it run rather than
+    // restarting from 0 on every tick.
+    if (!sound || cueMuted || !sound.paused) {
+      return;
+    }
+    sound.currentTime = 0;
+    sound.play().catch(function ignoreBlocked() {});
+  }
+
+  function stopElectricitySound() {
+    var sound = byId('electricitySound');
+    if (!sound || sound.paused) {
+      return;
+    }
+    sound.pause();
+    sound.currentTime = 0;
+  }
+
+  function playPuzzleClickSound() {
+    var sound = byId('puzzleClickSound');
+    if (!sound || cueMuted) {
+      return;
+    }
+    try {
+      sound.currentTime = 0;
+    } catch (error) {
+      // Some browsers throw if metadata isn't ready yet - fine to just play from wherever.
+    }
+    sound.play().catch(function ignoreBlocked() {});
+  }
+
+  function playLightOnDing() {
+    var sound = byId('lightOnSound');
+    if (!sound || cueMuted) {
+      return;
+    }
+    try {
+      sound.currentTime = 0;
+    } catch (error) {
+      // Some browsers throw if metadata isn't ready yet - fine to just play from wherever.
+    }
+    sound.play().catch(function ignoreBlocked() {});
+  }
+
   function setPuzzleCompletionFrame(board, frameIndex) {
     var frames = Array.from(board.querySelectorAll('.puzzle-completion-frame'));
     frames.forEach(function updateFrame(frame, index) {
@@ -235,6 +295,25 @@
   var openingSoundStarted = false;
   var openingSoundPrimed = false;
   var activeInkScreenId = null;
+  var openingSoundStopTimer = null;
+
+  function stopOpeningSound() {
+    root.clearTimeout(openingSoundStopTimer);
+    openingSoundStopTimer = null;
+    var audio = byId('openingPenSound');
+    if (audio && !audio.paused) {
+      audio.pause();
+    }
+  }
+
+  function scheduleOpeningSoundStop(windowMs) {
+    root.clearTimeout(openingSoundStopTimer);
+    // Stop the scratch sound exactly when the handwriting reveal finishes,
+    // instead of letting the clip run to its own, unrelated length - the
+    // clip is longer than most screens' reveal, so without this it kept
+    // scratching after the ink had already settled.
+    openingSoundStopTimer = root.setTimeout(stopOpeningSound, Math.max(0, windowMs));
+  }
 
   function primeOpeningSound() {
     var audio = byId('openingPenSound');
@@ -342,7 +421,7 @@
       label.textContent = String(year);
     }
     card.dataset.year = String(year);
-    card.setAttribute('aria-label', '当前展示' + alt + '，左右滑动查看上一本/下一本，双击展开选择');
+    card.setAttribute('aria-label', '当前展示' + alt + '，左右滑动查看上一张/下一张，双击展开选择');
   }
 
   function layoutStackCard(card, depth, animate) {
@@ -443,10 +522,18 @@
 
   function handleExpandScroll() {
     var list = byId('calendarExpand');
-    if (!list || expandWrapTimer) {
+    if (!list) {
       return;
     }
-    expandWrapTimer = root.requestAnimationFrame(function checkWrap() {
+    // Repositioning scrollLeft while native momentum/inertia is still
+    // actively animating the scroll fights the browser's own fling physics -
+    // on a fast flick that can visibly flash through many cards as the
+    // correction races the still-decelerating scroll. Waiting until scroll
+    // events stop firing (momentum has fully settled) means nothing is
+    // animating when we jump, so the correction lands in a single instant
+    // frame the eye can't catch.
+    root.clearTimeout(expandWrapTimer);
+    expandWrapTimer = root.setTimeout(function checkWrap() {
       expandWrapTimer = null;
       var copyWidth = list.scrollWidth / EXPAND_COPIES;
       if (list.scrollLeft < copyWidth * .5) {
@@ -454,7 +541,7 @@
       } else if (list.scrollLeft > copyWidth * 1.5) {
         list.scrollLeft -= copyWidth;
       }
-    });
+    }, 140);
   }
 
   function openCalendarExpand() {
@@ -646,7 +733,7 @@
         '<button type="button" data-open-image="', record.image, '" data-alt="', record.year, '年台历原稿">',
         '<img data-src="', record.scene, '" alt="', record.year, '年生活场景" width="700" height="467">',
         '<span class="life-card-year">', record.year, '</span>',
-        '<blockquote>', record.text, '</blockquote>',
+        '<blockquote class="paper-quote">', record.text, '</blockquote>',
         '</button>',
         '</div>'
       ].join('');
@@ -669,7 +756,7 @@
   function moveLife(direction) {
     lifeIndex = (lifeIndex + direction + content.lifeRecords.length) % content.lifeRecords.length;
     updateLifeCarousel();
-    playCue('page');
+    playFlipSound();
     if (scenes && scenes.loadImages) {
       scenes.loadImages(byId('s7'));
     }
@@ -1007,10 +1094,16 @@
       openingSoundReadyAt = Date.now();
       openingSoundWindowMs = Number(detail.totalMs) || 3800;
       attemptOpeningSound();
+      scheduleOpeningSoundStop(openingSoundWindowMs);
     });
 
     root.document.addEventListener('quote:ink-schedule', function onQuoteInk(event) {
       var detail = event.detail || {};
+      // s6's quote reveal uses the ceremony styling, not the pen-script font -
+      // it isn't meant to read as handwriting, so it shouldn't scratch either.
+      if (detail.screenId === 's6') {
+        return;
+      }
       var lastDelay = Array.isArray(detail.delays) && detail.delays.length
         ? detail.delays[detail.delays.length - 1]
         : 0;
@@ -1019,6 +1112,7 @@
       openingSoundReadyAt = Date.now();
       openingSoundWindowMs = lastDelay + 600;
       attemptOpeningSound();
+      scheduleOpeningSoundStop(openingSoundWindowMs);
     });
 
     root.document.addEventListener('quiz:auto-open', function onAutoQuiz(event) {
@@ -1028,17 +1122,20 @@
       }
     });
 
-    root.document.addEventListener('legacy-audio:auto-play', function onAutoPlayLegacyAudio() {
-      var audio = byId('inheritanceAudio');
-      if (!audio || !audio.paused) {
-        return;
-      }
-      media.pauseAll();
-      audio.play().catch(function ignoreBlocked() {});
+    root.document.addEventListener('calendar:flip', function onCalendarFlip() {
+      playFlipSound();
     });
 
-    root.document.addEventListener('calendar:flip', function onCalendarFlip() {
-      playCue('page');
+    root.document.addEventListener('light:charging', function onLightCharging() {
+      startElectricitySound();
+    });
+
+    root.document.addEventListener('light:charging:stop', function onLightChargingStop() {
+      stopElectricitySound();
+    });
+
+    root.document.addEventListener('light:on', function onLightOn() {
+      playLightOnDing();
     });
 
     var flipbook = byId('calendarFlipbook');
@@ -1091,7 +1188,11 @@
       var quizButton = event.target.closest('[data-open-quiz]');
       var expandItem = event.target.closest('.expand-item');
       var spendingNode = event.target.closest('.spending-node');
+      var puzzlePiece = event.target.closest('.puzzle-piece');
 
+      if (puzzlePiece && !puzzlePiece.disabled) {
+        playPuzzleClickSound();
+      }
       if (goButton) {
         unlockAudioContext();
         playCue(goButton.dataset.go === 's5' ? 'light' : 'page');
@@ -1140,22 +1241,29 @@
   }
 
   function updateProgress(screenId, index) {
-    var current = byId('currentScreen');
     var progress = byId('progressBar');
     var audio = byId('inheritanceAudio');
     var openingAudio = byId('openingPenSound');
     activeScreenId = screenId;
-    if (current) {
-      current.textContent = String(index + 1).padStart(2, '0');
-    }
     if (progress) {
       progress.style.width = (((index + 1) / 11) * 100) + '%';
     }
     if (screenId !== 's10' && audio && !audio.paused) {
       audio.pause();
     }
+    var tvStatic = byId('tvStaticSound');
+    if (tvStatic) {
+      if (screenId === 's5') {
+        if (tvStatic.paused && !cueMuted) {
+          tvStatic.volume = .16;
+          tvStatic.play().catch(function ignoreBlocked() {});
+        }
+      } else if (!tvStatic.paused) {
+        tvStatic.pause();
+      }
+    }
     if (screenId !== activeInkScreenId && openingAudio && !openingAudio.paused) {
-      openingAudio.pause();
+      stopOpeningSound();
     }
     if (screenId === 's9' && puzzleController && !puzzleTimerStarted) {
       puzzleTimerStarted = true;
@@ -1181,10 +1289,27 @@
     });
   }
 
+  function applySceneBackgrounds() {
+    content.screens.forEach(function applyBackground(screen) {
+      var element;
+      if (!screen.background) {
+        return;
+      }
+      element = byId(screen.id);
+      if (element) {
+        element.style.setProperty(
+          '--scene-background-image',
+          'url("' + core.toCssAssetUrl(screen.background) + '")'
+        );
+      }
+    });
+  }
+
   function buildExperience() {
     if (experienceBuilt) {
       return;
     }
+    applySceneBackgrounds();
     buildCalendarStack();
     preloadCalendarImages();
     buildLifeCards();
@@ -1234,8 +1359,19 @@
         if (openingAudio && !openingAudio.paused) {
           openingAudio.pause();
         }
+        var tvStatic = byId('tvStaticSound');
+        if (tvStatic && !tvStatic.paused) {
+          tvStatic.pause();
+        }
       } else {
         playCue('page');
+        if (activeScreenId === 's5') {
+          var resumedStatic = byId('tvStaticSound');
+          if (resumedStatic && resumedStatic.paused) {
+            resumedStatic.volume = .16;
+            resumedStatic.play().catch(function ignoreBlocked() {});
+          }
+        }
       }
     });
     experienceBuilt = true;

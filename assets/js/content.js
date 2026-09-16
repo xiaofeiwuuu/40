@@ -18,7 +18,8 @@
       id: 's1',
       chapter: '打开时间',
       eyebrow: '一份献给时间的礼物',
-      title: '写给时间的第一行',
+      title: '40本台历 见证变迁',
+      background: 'assets/images/scenes/s1-time-monument.webp',
       lead: '2026年9月28日，巴中市平昌县元山镇元山社区85岁老党员陈治国，将自己连续记录了40年的40本台历，郑重捐给县档案馆，为共和国生日献上了一份特殊的礼物。'
     },
     {
@@ -26,6 +27,7 @@
       chapter: '打开时间',
       eyebrow: '1987—2026',
       title: '翻开40年',
+      background: 'assets/images/scenes/s2-calendar-river-years.webp',
       subtitle: '一位老党员40本台历里的家国变迁'
     },
     {
@@ -33,6 +35,7 @@
       chapter: '记录改变',
       eyebrow: '初心 · 根脉',
       title: '笔从未停歇',
+      background: 'assets/images/scenes/s3-writing-archive-bg.webp',
       quote: '1987年正月初一，他在第一本台历上写下：“新的一年，希望日子越过越好。”40年，14600多个日夜，他的笔从未停歇。',
       mediaLabel: '播放陈治国自我介绍采访视频',
       video: 'assets/video/s3-intro.mp4',
@@ -44,6 +47,7 @@
       chapter: '记录改变',
       eyebrow: '1987 · 告别煤油灯',
       title: '家里亮起电灯',
+      background: 'assets/images/scenes/s4-electric-light-bg.webp',
       quote: '1987年7月14日，特请张公电管所管电员王云述来家，在土墙上安好正规线路、插座和开关，正式安全用电。',
       manuscript: 'assets/images/records/s4-1987.jpg'
     },
@@ -52,6 +56,7 @@
       chapter: '记录改变',
       eyebrow: '1990 · 第一台电视机',
       title: '方寸荧屏，看见远方',
+      background: 'assets/images/scenes/s5-television-night-bg.webp',
       quote: '1990年4月1日，今日买上海牌的14英寸黑白电视机一部花费387元。',
       mediaLabel: '播放陈治国讲述第一台电视机的采访视频',
       video: 'assets/video/s5-tv.mp4',
@@ -63,6 +68,7 @@
       chapter: '记录改变',
       eyebrow: '2006 · 农业税取消',
       title: '两道红线，划过千年',
+      background: 'assets/images/scenes/s6-tax-wheat-bg.webp',
       quote: '2006年1月1日，看新闻，取消农民农业税！',
       mediaLabel: '播放农业税取消相关采访视频',
       video: 'assets/video/s6-tax.mp4',
@@ -74,6 +80,7 @@
       chapter: '日子变好',
       eyebrow: '柴米油盐里的时代',
       title: '日子越过越好',
+      background: 'assets/images/scenes/s7-good-life-bg.webp',
       subtitle: '四次落笔，四个普通家庭的生活切面'
     },
     {
@@ -81,6 +88,7 @@
       chapter: '日子变好',
       eyebrow: '1990—2020',
       title: '腰包越来越鼓',
+      background: 'assets/images/scenes/s8-spending-new-year-bg.webp',
       subtitle: '台历记录的年货开支'
     },
     {
@@ -88,6 +96,7 @@
       chapter: '日子变好',
       eyebrow: '一块一块，把日子拼完整',
       title: '拼出好日子',
+      background: 'assets/images/scenes/s9-village-life-bg.webp',
       subtitle: '拖动拼图，或依次点击两块进行交换',
       puzzleImage: 'assets/images/scenes/s9-good-life-base.webp',
       completionFrames: [
@@ -100,6 +109,7 @@
       chapter: '共同记忆',
       eyebrow: '传承 · 接力',
       title: '记录不会停下',
+      background: 'assets/images/scenes/s10-legacy-room-bg.webp',
       oldQuote: '我年纪大了，眼睛花了，以后记录的事，就交给女儿陈芳了。',
       newQuote: '父亲用台历，我用手机。方式不同，但初心一样。时代在变，记录的方式在变，但我们爱党、信党、跟党走的初心永远不会变。',
       attribution: '——陈芳',
@@ -111,6 +121,7 @@
       chapter: '共同记忆',
       eyebrow: '2026 · 捐赠献礼',
       title: '我决定把40本台历，捐赠给档案馆',
+      background: 'assets/images/scenes/s11-archive-finale-bg.webp',
       subtitle: '一个人的日常，成为一座城共同的记忆。'
     }
   ];
@@ -180,6 +191,7 @@
       imageAspect: '1374 / 1145',
       answerArea: { top: 45, right: 22, bottom: 28, left: 22 },
       autoOpenOn: 's7',
+      mandatory: true,
       correctCloseDelayMs: 1000,
       next: 's7'
     },

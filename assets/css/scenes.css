@@ -9,10 +9,10 @@
 
 .screen::before {
   background:
-    radial-gradient(circle at 12% 18%, rgba(77, 54, 31, .08) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 86% 72%, rgba(77, 54, 31, .07) 0 1px, transparent 1.5px),
-    repeating-linear-gradient(98deg, transparent 0 7px, rgba(92, 69, 42, .018) 8px 9px),
-    linear-gradient(135deg, var(--paper-light), var(--paper));
+    radial-gradient(circle at 12% 18%, rgba(240, 216, 140, .08) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 86% 72%, rgba(240, 216, 140, .07) 0 1px, transparent 1.5px),
+    repeating-linear-gradient(98deg, transparent 0 7px, rgba(255, 255, 255, .02) 8px 9px),
+    linear-gradient(135deg, #5c1614, #2c0908);
   background-size: 41px 37px, 53px 47px, auto, auto;
 }
 
@@ -24,22 +24,38 @@
 
 .screen-opening {
   align-items: stretch;
-  justify-content: space-between;
-  padding-top: calc(var(--safe-top) + 4.2rem);
-  padding-bottom: calc(var(--safe-bottom) + 2.2rem);
+  justify-content: flex-end;
+  padding-top: calc(var(--safe-top) + 4.5rem);
+  padding-bottom: calc(var(--safe-bottom) + 2.45rem);
 }
 
 .screen-opening::before {
   background:
-    radial-gradient(circle at 50% 8%, rgba(255, 255, 255, .5), transparent 36%),
-    repeating-linear-gradient(0deg, transparent 0 25px, rgba(78, 58, 38, .055) 26px 27px),
-    linear-gradient(115deg, #f6ecd5, #ddc79c);
+    linear-gradient(180deg, rgba(32, 5, 7, .08) 0%, rgba(42, 5, 8, .02) 42%, rgba(25, 2, 4, .91) 87%, #210305 100%),
+    var(--scene-background-image),
+    linear-gradient(115deg, #6e1d1a, #2c0908);
+  background-position: center center;
+  background-size: cover;
+  filter: saturate(1.04) contrast(1.02);
+  transform: scale(1.045);
+  transform-origin: 50% 48%;
+  will-change: transform, filter;
+}
+
+.screen-opening::after {
+  inset: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 211, 116, .2), transparent 24%),
+    linear-gradient(90deg, rgba(39, 3, 5, .26), transparent 22% 78%, rgba(39, 3, 5, .22));
 }
 
 .folio-corners {
   position: absolute;
+  z-index: 1;
   inset: 1.2rem;
-  border: 1px solid rgba(104, 73, 41, .12);
+  border: 1px solid rgba(248, 213, 128, .2);
+  pointer-events: none;
 }
 
 .folio-corners::before,
@@ -47,7 +63,7 @@
   position: absolute;
   width: 2.2rem;
   height: 2.2rem;
-  border-color: var(--archive-red);
+  border-color: var(--gold);
   content: "";
   opacity: .6;
 }
@@ -66,61 +82,106 @@
   border-bottom: 2px solid;
 }
 
-.s1-date {
-  position: absolute;
-  top: calc(var(--safe-top) + 1.8rem);
-  right: 1.6rem;
-  color: var(--archive-red);
-  font: 600 .68rem/1 -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: .15em;
-  writing-mode: vertical-rl;
+.screen-opening .eyebrow {
+  color: #f0cd75;
+  text-shadow: 0 2px 12px rgba(25, 2, 4, .9);
+}
+
+.opening-copy {
+  border-left-color: var(--gold);
+}
+
+.opening-lead {
+  color: #fbeed7;
 }
 
 .opening-portrait {
-  position: relative;
-  width: min(100%, 460px);
-  margin: 0 auto;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(159, 51, 42, .4);
-  box-shadow: 0 1rem 2rem rgba(33, 26, 20, .3);
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--safe-top) + 5.2rem);
+  left: clamp(1.25rem, 6vw, 2.75rem);
+  width: clamp(6.4rem, 29vw, 9.2rem);
+  padding: .28rem .28rem 1.15rem;
+  border: 1px solid rgba(250, 221, 151, .72);
+  border-radius: 2px;
+  overflow: visible;
+  background: #f1dfb9;
+  box-shadow: .55rem .85rem 1.7rem rgba(28, 2, 4, .46);
+  transform: rotate(-4deg);
+  transform-origin: 50% 100%;
 }
 
 .opening-portrait::after {
   position: absolute;
-  bottom: -.85rem;
-  left: 50%;
-  width: 1px;
-  height: clamp(1.2rem, 4vh, 2.4rem);
-  background: linear-gradient(var(--archive-red), transparent);
-  content: "";
-  transform: translateX(-50%);
+  right: .3rem;
+  bottom: .3rem;
+  left: .3rem;
+  height: .55rem;
+  background: repeating-linear-gradient(90deg, #8a2d24 0 .45rem, transparent .45rem .64rem);
+  content: "ARCHIVE  ·  2026";
+  color: #76231e;
+  font: 650 .34rem/1 var(--font-hei);
+  letter-spacing: .12em;
+  text-align: center;
 }
 
 .opening-portrait img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
-  filter: sepia(.12) saturate(.94);
+  filter: sepia(.2) saturate(.82) contrast(1.04);
 }
 
 .opening-copy {
   position: relative;
-  z-index: 2;
-  width: min(100%, 500px);
-  margin: 0 auto;
-  padding-left: clamp(.75rem, 3.5vw, 1.5rem);
-  border-left: 2px solid rgba(159, 51, 42, .78);
+  z-index: 4;
+  width: min(100%, 540px);
+  margin: 0 auto .7rem;
+  padding: .85rem .9rem .75rem 1rem;
+  border-top: 1px solid rgba(241, 207, 119, .42);
+  border-left: 2px solid var(--gold);
+  background: linear-gradient(105deg, rgba(45, 3, 6, .9), rgba(52, 4, 7, .63) 72%, transparent);
+  box-shadow: -1rem 0 2.5rem rgba(31, 2, 4, .28);
+  backdrop-filter: blur(2px);
+}
+
+.opening-title {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  margin-top: .38rem;
+  color: #fff0bf;
+  font-family: var(--font-hei);
+  font-size: clamp(1.55rem, 7.4vw, 2.7rem);
+  font-weight: 850;
+  letter-spacing: .05em;
+  line-height: 1.06;
+  text-shadow: 0 2px 14px rgba(24, 1, 3, .82), 0 0 20px rgba(214, 157, 42, .2);
+}
+
+.opening-title span {
+  color: #f0ca67;
+  font-size: .58em;
+  font-weight: 700;
+  letter-spacing: .12em;
+  white-space: nowrap;
+}
+
+.opening-title strong {
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .opening-lead {
-  margin-top: clamp(.8rem, 2.5vh, 1.4rem);
-  font-family: "PenDiary", "Songti SC", "STSong", serif;
-  font-size: clamp(1.08rem, 4.6vw, 1.44rem);
-  font-weight: 400;
-  letter-spacing: .01em;
-  line-height: 2.15;
+  max-width: 31rem;
+  margin-top: .7rem;
+  font-family: var(--font-kai);
+  font-size: clamp(.8rem, 3.35vw, 1.02rem);
+  font-weight: 500;
+  letter-spacing: .025em;
+  line-height: 1.72;
+  text-shadow: 0 2px 9px rgba(22, 1, 2, .95);
 }
 
 .opening-lead span {
@@ -134,6 +195,11 @@
 
 .opening-button {
   align-self: center;
+  border: 1px solid rgba(255, 221, 139, .65);
+  background: linear-gradient(135deg, #a43827, #6f1514);
+  box-shadow: 0 .65rem 2rem rgba(26, 1, 3, .42), inset 0 1px rgba(255, 235, 181, .2);
+  color: #fff0bf;
+  font-family: var(--font-hei);
 }
 
 .opening-button i {
@@ -144,16 +210,10 @@
   position: absolute;
   bottom: calc(var(--safe-bottom) + .65rem);
   left: 50%;
-  color: rgba(73, 55, 38, .5);
+  color: rgba(255, 240, 207, .55);
   font: 500 .58rem/1 -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: .18em;
   transform: translateX(-50%);
-}
-
-.screen-television .scroll-hint,
-.screen-tax .scroll-hint,
-.screen-inheritance .scroll-hint {
-  color: rgba(255, 240, 207, .55);
 }
 
 .screen-calendars {
@@ -161,12 +221,45 @@
   padding-bottom: calc(var(--safe-bottom) + 2rem);
 }
 
+.screen-calendars::before {
+  background:
+    linear-gradient(180deg, rgba(28, 3, 5, .12), rgba(34, 3, 5, .02) 42%, rgba(24, 2, 4, .86) 88%, #210305 100%),
+    var(--scene-background-image),
+    linear-gradient(135deg, #5c1614, #2c0908);
+  background-position: center center;
+  background-size: cover;
+  filter: saturate(.96) contrast(1.03);
+  transform: scale(1.045);
+  transform-origin: 50% 46%;
+  will-change: transform, filter;
+}
+
+.screen-calendars::after {
+  inset: 0;
+  border: 0;
+  background:
+    radial-gradient(ellipse at 50% 46%, rgba(255, 219, 130, .18), transparent 27%),
+    linear-gradient(90deg, rgba(31, 2, 4, .22), transparent 25% 75%, rgba(31, 2, 4, .24));
+}
+
 .calendar-flipbook {
   position: relative;
-  z-index: 1;
-  width: min(64vw, 270px);
+  z-index: 3;
+  width: min(55vw, 238px);
   aspect-ratio: 3 / 4;
-  margin: calc(var(--safe-top) + 1.5rem) auto 0;
+  margin: calc(var(--safe-top) + 3.1rem) auto 0;
+  perspective: 900px;
+  filter: drop-shadow(0 1.1rem 1.4rem rgba(28, 3, 3, .42));
+}
+
+.calendar-flipbook::before {
+  position: absolute;
+  z-index: -1;
+  inset: -16%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 221, 132, .26), transparent 65%);
+  content: "";
+  pointer-events: none;
 }
 
 .stack-card {
@@ -176,7 +269,7 @@
   border-radius: 4px;
   overflow: hidden;
   background: #bd9f6b;
-  box-shadow: 0 .8rem 1.7rem rgba(45, 29, 17, .3);
+  box-shadow: 0 .8rem 1.7rem rgba(31, 3, 4, .48), 0 0 0 1px rgba(226, 179, 82, .3);
   padding: 0;
   appearance: none;
   touch-action: none;
@@ -253,6 +346,8 @@
 }
 
 .stack-hint-row {
+  position: relative;
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -261,8 +356,8 @@
 }
 
 .stack-hint {
-  color: var(--ink-faint);
-  font: 500 .64rem/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
+  color: rgba(255, 240, 207, .72);
+  font: 500 .64rem/1.5 var(--font-hei);
   letter-spacing: .04em;
   text-align: center;
 }
@@ -272,8 +367,8 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--archive-red);
-  font: 600 .64rem/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--gold);
+  font: 650 .64rem/1.5 var(--font-hei);
   letter-spacing: .04em;
   text-decoration: underline;
   text-underline-offset: .18em;
@@ -309,17 +404,24 @@
   display: flex;
   align-items: flex-end;
   gap: .3rem;
-  color: var(--archive-red);
+  padding: .55rem .65rem .52rem;
+  border: 1px solid rgba(238, 198, 103, .48);
+  background: rgba(77, 9, 10, .48);
+  box-shadow: 0 .5rem 1.5rem rgba(28, 2, 4, .3);
+  color: #f3cf74;
   transform: rotate(2deg);
+  backdrop-filter: blur(3px);
 }
 
 .calendar-count strong {
   font-size: clamp(2.5rem, 12vw, 4.8rem);
-  font-weight: 500;
+  font-family: var(--font-hei);
+  font-weight: 800;
   line-height: .8;
 }
 
 .calendar-count span {
+  font-family: var(--font-hei);
   font-size: .66rem;
   font-weight: 650;
   letter-spacing: .1em;
@@ -331,15 +433,29 @@
   width: 100%;
   margin-bottom: clamp(.9rem, 2.2vh, 1.4rem);
   text-align: center;
+  text-shadow: 0 2px 12px rgba(24, 1, 3, .95);
 }
 
 .scene-copy-center .display-title {
   margin-top: .32rem;
   font-size: clamp(2.25rem, 11vw, 4.2rem);
+  font-weight: 850;
 }
 
 .scene-copy-center .subtitle {
   margin-top: .55rem;
+  font-family: var(--font-kai);
+  font-weight: 600;
+}
+
+.screen-calendars > .text-button {
+  border-color: rgba(245, 209, 120, .48);
+  background: rgba(99, 17, 17, .72);
+  box-shadow: 0 .55rem 1.5rem rgba(25, 1, 3, .38), inset 0 1px rgba(255, 231, 170, .16);
+  color: #f6d77d;
+  font-family: var(--font-hei);
+  font-weight: 700;
+  backdrop-filter: blur(3px);
 }
 
 .screen-document {
@@ -348,9 +464,14 @@
 
 .screen-document::before {
   background:
-    linear-gradient(90deg, transparent 12%, rgba(159, 51, 42, .08) 12.2%, transparent 12.5%),
-    repeating-linear-gradient(0deg, transparent 0 30px, rgba(69, 51, 35, .045) 31px 32px),
-    linear-gradient(125deg, var(--paper-light), #deca9f);
+    linear-gradient(180deg, rgba(31, 3, 5, .2), rgba(26, 2, 4, .08) 35%, rgba(25, 2, 4, .42) 100%),
+    var(--scene-background-image),
+    linear-gradient(125deg, #5c1614, #2c0908);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .doc-split {
@@ -495,7 +616,7 @@
 #s3 .record-quote,
 #s4 .record-quote,
 #s5 .record-quote {
-  font-family: "PenDiary", "Songti SC", "STSong", serif;
+  font-family: var(--font-kai);
   font-size: clamp(.92rem, 3.9vw, 1.12rem);
   font-weight: 400;
   letter-spacing: .015em;
@@ -510,8 +631,14 @@
 
 .screen-electric::before {
   background:
-    radial-gradient(circle at 78% 35%, rgba(255, 214, 85, .35), transparent 24%),
-    linear-gradient(135deg, #d8c397, #f4e7c9 58%, #e0c17e);
+    linear-gradient(180deg, rgba(34, 3, 4, .15), rgba(25, 2, 3, .1) 38%, rgba(26, 2, 4, .46)),
+    var(--scene-background-image),
+    linear-gradient(135deg, #6e1d1a, #2c0908 58%, #3c0c0f);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .light-compare {
@@ -609,11 +736,14 @@
 
 .screen-television::before {
   background:
-    radial-gradient(circle at 16% 15%, #f4e8c7 0 1px, transparent 1.5px),
-    radial-gradient(circle at 78% 24%, #f4e8c7 0 1px, transparent 1.5px),
-    radial-gradient(circle at 61% 61%, #f4e8c7 0 1px, transparent 1.5px),
-    linear-gradient(160deg, #0d1725, #24324a 58%, #111726);
-  background-size: 85px 70px, 103px 89px, 117px 105px, auto;
+    linear-gradient(180deg, rgba(13, 10, 20, .12), rgba(14, 8, 15, .08) 42%, rgba(25, 2, 4, .5)),
+    var(--scene-background-image),
+    linear-gradient(160deg, #2c0908, #5c1614 58%, #240605);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .screen-television::after,
@@ -703,8 +833,14 @@
 
 .screen-tax::before {
   background:
-    radial-gradient(circle at 50% 42%, rgba(214, 173, 89, .28), transparent 32%),
+    linear-gradient(180deg, rgba(54, 7, 8, .08), rgba(45, 5, 7, .16) 38%, rgba(34, 3, 5, .5)),
+    var(--scene-background-image),
     linear-gradient(150deg, #3c0c0f, #7b1d1c 57%, #310a0d);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .tax-scene {
@@ -735,7 +871,9 @@
   pointer-events: none;
 }
 
-.screen-tax .text-link {
+.screen-tax .text-link,
+.screen-electric .text-link,
+.screen-spending .text-link {
   color: #ffe9b8;
 }
 
@@ -781,9 +919,14 @@
 
 .screen-life::before {
   background:
-    linear-gradient(90deg, transparent 7%, rgba(159, 51, 42, .06) 7.2%, transparent 7.5%),
-    repeating-linear-gradient(0deg, transparent 0 29px, rgba(78, 58, 38, .045) 30px 31px),
-    linear-gradient(145deg, #f4e9d1, #dfc79a);
+    linear-gradient(180deg, rgba(44, 5, 7, .12), rgba(42, 4, 6, .12) 35%, rgba(30, 3, 5, .48)),
+    var(--scene-background-image),
+    linear-gradient(145deg, #5c1614, #2c0908);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .life-carousel {
@@ -843,7 +986,7 @@
   margin-top: .8rem;
   padding-left: .7rem;
   border-left: 2px solid var(--archive-red);
-  font-family: "PenDiary", "Songti SC", "STSong", serif;
+  font-family: var(--font-kai);
   font-size: clamp(.86rem, 3.6vw, 1.02rem);
   font-weight: 400;
   line-height: 1.85;
@@ -859,30 +1002,33 @@
 }
 
 .carousel-count {
-  color: var(--ink-soft);
+  color: rgba(255, 240, 207, .85);
   font: 600 .7rem/1 -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: .12em;
 }
 
 .carousel-hint {
-  color: var(--ink-faint);
+  color: rgba(255, 240, 207, .55);
   font: 500 .64rem/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: .04em;
 }
 
 .screen-spending::before {
   background:
-    radial-gradient(circle at 18% 14%, rgba(120, 90, 40, .07), transparent 42%),
-    radial-gradient(circle at 86% 82%, rgba(120, 90, 40, .06), transparent 46%),
-    linear-gradient(90deg, transparent 49.8%, rgba(80, 58, 35, .04) 50%, transparent 50.2%),
-    linear-gradient(150deg, #efe2c5, #d8bd8d);
+    linear-gradient(180deg, rgba(45, 5, 7, .1), rgba(40, 4, 6, .12) 34%, rgba(29, 2, 4, .53)),
+    var(--scene-background-image),
+    linear-gradient(150deg, #5c1614, #2c0908);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .spending-timeline {
   position: relative;
   z-index: 2;
   width: min(100%, 540px);
-  touch-action: none;
 }
 
 .spending-track {
@@ -977,14 +1123,14 @@
 
 .spending-amount {
   margin-bottom: .35rem;
-  color: var(--archive-red);
+  color: #f0d88c;
   font: 700 clamp(.65rem, 2.8vw, .85rem)/1 -apple-system, BlinkMacSystemFont, sans-serif;
   font-variant-numeric: tabular-nums;
   transition: color .3s ease;
 }
 
 .spending-item.is-grown .spending-amount {
-  color: #a8641f;
+  color: #fff3d0;
 }
 
 .spending-bar {
@@ -1006,7 +1152,7 @@
   gap: .3rem;
   min-height: 1.4rem;
   margin-top: .9rem;
-  color: var(--ink-soft);
+  color: rgba(255, 240, 207, .78);
   font: 500 .68rem/1.55 -apple-system, BlinkMacSystemFont, sans-serif;
   text-align: center;
   opacity: 0;
@@ -1018,22 +1164,28 @@
 }
 
 .spending-detail strong {
-  color: var(--archive-red);
+  color: #f0d88c;
   font-size: .74rem;
 }
 
 .chart-note {
   z-index: 2;
   margin-top: .9rem;
-  color: var(--ink-faint);
+  color: rgba(255, 240, 207, .5);
   font: 500 .61rem/1.6 -apple-system, BlinkMacSystemFont, sans-serif;
   text-align: center;
 }
 
 .screen-puzzle::before {
   background:
-    radial-gradient(circle at 50% 52%, rgba(159, 51, 42, .1), transparent 36%),
-    linear-gradient(130deg, #f3e8d0, #d9c08f);
+    linear-gradient(180deg, rgba(40, 4, 5, .2), rgba(30, 2, 4, .16) 40%, rgba(25, 2, 4, .5)),
+    var(--scene-background-image),
+    linear-gradient(130deg, #5c1614, #2c0908);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .puzzle-stage {
@@ -1182,7 +1334,7 @@
 .puzzle-hint {
   z-index: 2;
   margin-top: .7rem;
-  color: var(--ink-soft);
+  color: rgba(255, 240, 207, .72);
   font: 600 .66rem/1.5 -apple-system, BlinkMacSystemFont, sans-serif;
   letter-spacing: .05em;
   text-align: center;
@@ -1198,7 +1350,7 @@
   margin: 0;
   padding: 0 9%;
   color: #fff3d9;
-  font-family: "PenDiary", "Songti SC", "STSong", serif;
+  font-family: var(--font-kai);
   font-size: clamp(1.5rem, 7.6vw, 2.5rem);
   font-weight: 400;
   letter-spacing: .08em;
@@ -1219,15 +1371,21 @@
   padding-block: .25rem;
   border-color: transparent;
   background: transparent;
-  color: var(--ink-soft);
+  color: rgba(255, 240, 207, .72);
   text-decoration: underline;
   text-underline-offset: .2rem;
 }
 
 .screen-inheritance::before {
   background:
-    radial-gradient(circle at 20% 28%, rgba(214, 173, 89, .12), transparent 30%),
+    linear-gradient(180deg, rgba(30, 3, 4, .16), rgba(27, 2, 4, .1) 38%, rgba(22, 2, 3, .5)),
+    var(--scene-background-image),
     linear-gradient(145deg, #241712, #4e1b18 68%, #25100f);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .legacy-scene {
@@ -1259,7 +1417,7 @@
   border-left: 2px solid rgba(214, 173, 89, .5);
   background: transparent;
   color: rgba(255, 240, 207, .72);
-  font-family: "PenDiary", "Songti SC", "STSong", serif;
+  font-family: var(--font-kai);
   font-size: clamp(.82rem, 3.4vw, 1rem);
   font-weight: 400;
   letter-spacing: .015em;
@@ -1276,6 +1434,20 @@
   color: var(--gold);
   font-style: normal;
   text-align: right;
+}
+
+.paper-quote {
+  background-image: linear-gradient(rgba(255, 250, 238, .28), rgba(255, 250, 238, .28)), url("../images/scenes/s3-paper-texture.webp");
+  background-size: cover;
+  background-position: center;
+  background-color: #e8d5ad;
+  border-left-color: var(--archive-red);
+  color: var(--ink);
+  box-shadow: 0 .5rem 1.4rem rgba(46, 29, 16, .2);
+}
+
+.paper-quote cite {
+  color: var(--archive-red);
 }
 
 .audio-button {
@@ -1348,8 +1520,14 @@
 
 .screen-finale::before {
   background:
-    radial-gradient(circle at 50% 42%, rgba(239, 197, 93, .25), transparent 31%),
+    linear-gradient(180deg, rgba(35, 3, 5, .08), rgba(29, 2, 4, .12) 36%, rgba(25, 2, 4, .5)),
+    var(--scene-background-image),
     linear-gradient(155deg, #35090d, #7c1918 62%, #30080c);
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  transform-origin: 50% 48%;
+  will-change: transform;
 }
 
 .finale-rays {
@@ -1628,9 +1806,14 @@ img.is-broken {
 }
 
 @media (max-height: 640px) {
-  .opening-lead { line-height: 1.75; }
-  .opening-portrait { width: min(100%, 340px); }
-  .calendar-flipbook { width: min(48vw, 210px); }
+  .screen-opening { padding-bottom: calc(var(--safe-bottom) + 1.9rem); }
+  .opening-portrait { top: calc(var(--safe-top) + 4.2rem); width: clamp(5.2rem, 23vw, 6.7rem); }
+  .opening-copy { margin-bottom: .35rem; padding-block: .62rem; }
+  .opening-title { font-size: clamp(1.3rem, 6.4vw, 2rem); }
+  .opening-lead { margin-top: .42rem; font-size: clamp(.69rem, 2.75vw, .82rem); line-height: 1.55; }
+  .calendar-flipbook { width: min(44vw, 185px); margin-top: calc(var(--safe-top) + 2.5rem); }
+  .stack-hint-row { margin-top: .45rem; }
+  .scene-copy-center { margin-bottom: .55rem; }
   .calendar-expand { height: 38vh; }
   .film-frame { width: min(88%, 430px); }
   .record-quote { margin-top: .6rem; padding-block: .55rem; line-height: 1.58; }
@@ -1647,7 +1830,8 @@ img.is-broken {
 @media (min-width: 600px) and (pointer: coarse), (min-width: 600px) and (hover: none) {
   .calendar-flipbook { width: min(38vw, 260px); }
   .opening-copy { max-width: 560px; }
-  .opening-lead { font-size: 1.28rem; }
+  .opening-portrait { width: 9.4rem; }
+  .opening-lead { font-size: 1.05rem; }
   .spending-chart { height: min(43vh, 26rem); }
   .puzzle-stage { width: min(46vw, 390px, 44vh); }
 }

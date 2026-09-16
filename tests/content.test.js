@@ -14,6 +14,41 @@ test('首屏和第四屏使用修正后的发布文案', () => {
   assert.equal(s4.quote, '1987年7月14日，特请张公电管所管电员王云述来家，在土墙上安好正规线路、插座和开关，正式安全用电。');
 });
 
+test('第一、二屏使用同一红金时间叙事的独立背景', () => {
+  const s1 = content.screens.find((screen) => screen.id === 's1');
+  const s2 = content.screens.find((screen) => screen.id === 's2');
+
+  assert.equal(s1.background, 'assets/images/scenes/s1-time-monument.webp');
+  assert.equal(s2.background, 'assets/images/scenes/s2-calendar-river-years.webp');
+  assert.notEqual(s1.background, s2.background);
+});
+
+test('第三至第十屏及终章使用各自的叙事背景', () => {
+  const backgrounds = Object.fromEntries(content.screens.map((screen) => [screen.id, screen.background]));
+
+  assert.deepEqual({
+    s3: backgrounds.s3,
+    s4: backgrounds.s4,
+    s5: backgrounds.s5,
+    s6: backgrounds.s6,
+    s7: backgrounds.s7,
+    s8: backgrounds.s8,
+    s9: backgrounds.s9,
+    s10: backgrounds.s10,
+    s11: backgrounds.s11
+  }, {
+    s3: 'assets/images/scenes/s3-writing-archive-bg.webp',
+    s4: 'assets/images/scenes/s4-electric-light-bg.webp',
+    s5: 'assets/images/scenes/s5-television-night-bg.webp',
+    s6: 'assets/images/scenes/s6-tax-wheat-bg.webp',
+    s7: 'assets/images/scenes/s7-good-life-bg.webp',
+    s8: 'assets/images/scenes/s8-spending-new-year-bg.webp',
+    s9: 'assets/images/scenes/s9-village-life-bg.webp',
+    s10: 'assets/images/scenes/s10-legacy-room-bg.webp',
+    s11: 'assets/images/scenes/s11-archive-finale-bg.webp'
+  });
+});
+
 test('采访标签和答题跳转准确', () => {
   const s3 = content.screens.find((screen) => screen.id === 's3');
   const s10 = content.screens.find((screen) => screen.id === 's10');

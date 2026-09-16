@@ -195,7 +195,7 @@
   min-height: 100dvh;
   margin-inline: auto;
   overflow: hidden;
-  background: var(--paper);
+  background: #2c0908;
   box-shadow: 0 0 8rem rgba(0, 0, 0, .65);
 }
 
@@ -222,26 +222,6 @@
   height: 100%;
   background: var(--gold);
   transform-origin: left center;
-}
-
-.screen-counter {
-  position: absolute;
-  top: calc(var(--safe-top) + .85rem);
-  right: 4.3rem;
-  color: rgba(255, 247, 230, .85);
-  font: 500 .66rem/1 -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: .12em;
-  mix-blend-mode: difference;
-}
-
-.screen-counter span {
-  font-size: .82rem;
-}
-
-.screen-counter b {
-  padding: 0 .28rem;
-  font-weight: 400;
-  opacity: .55;
 }
 
 .sound-toggle {
@@ -284,6 +264,12 @@
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app-scroller::-webkit-scrollbar {
+  display: none;
 }
 
 .screen {

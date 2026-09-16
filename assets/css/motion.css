@@ -51,6 +51,46 @@
   animation: hintFloat 1.8s ease-in-out infinite;
 }
 
+.screen-opening.is-active::before {
+  animation: monumentDrift 13s ease-in-out infinite alternate;
+}
+
+.screen-opening.is-active::after {
+  animation: monumentLight 6.5s ease-in-out infinite;
+}
+
+.screen-opening.is-active .opening-portrait img {
+  animation: archivePhotoBreathe 7s ease-in-out infinite alternate;
+}
+
+.screen-calendars.is-active::before {
+  animation: calendarRiverDrift 15s ease-in-out infinite alternate;
+}
+
+.screen-calendars.is-active::after {
+  animation: calendarRiverLight 7.5s ease-in-out infinite;
+}
+
+.screen-calendars.is-active .calendar-flipbook::before {
+  animation: calendarAura 3.8s ease-in-out infinite;
+}
+
+.screen-calendars.is-active .calendar-count {
+  animation: calendarCountFloat 3.6s ease-in-out infinite;
+}
+
+.screen-document.is-active::before,
+.screen-electric.is-active::before,
+.screen-television.is-active::before,
+.screen-tax.is-active::before,
+.screen-life.is-active::before,
+.screen-spending.is-active::before,
+.screen-puzzle.is-active::before,
+.screen-inheritance.is-active::before,
+.screen-finale.is-active::before {
+  animation: chapterBackdropDrift 16s ease-in-out infinite alternate;
+}
+
 .screen-television.is-active .tv-hotspot {
   animation: tvHotspotPulse 2.6s ease-in-out infinite;
 }
@@ -78,6 +118,10 @@
 
 .screen-finale.is-active .finale-rays {
   animation: slowTurn 38s linear infinite;
+}
+
+.modal-layer:not([hidden]) {
+  animation: modalBackdropIn .32s ease both;
 }
 
 .modal-layer:not([hidden]) .modal-panel {
@@ -122,6 +166,46 @@
 @keyframes quietPulse {
   0%, 100% { box-shadow: 0 .5rem 1.6rem rgba(85, 21, 17, .2); }
   50% { box-shadow: 0 .5rem 2.1rem rgba(159, 51, 42, .38); }
+}
+
+@keyframes monumentDrift {
+  0% { transform: scale(1.045) translate3d(0, 0, 0); filter: saturate(1.02) contrast(1.02) brightness(.98); }
+  100% { transform: scale(1.085) translate3d(0, -.65%, 0); filter: saturate(1.08) contrast(1.03) brightness(1.04); }
+}
+
+@keyframes monumentLight {
+  0%, 100% { opacity: .72; }
+  50% { opacity: 1; }
+}
+
+@keyframes archivePhotoBreathe {
+  0% { transform: scale(1); filter: sepia(.2) saturate(.82) contrast(1.04); }
+  100% { transform: scale(1.035); filter: sepia(.16) saturate(.94) contrast(1.06); }
+}
+
+@keyframes calendarRiverDrift {
+  0% { transform: scale(1.045) translate3d(0, 0, 0); filter: saturate(.94) contrast(1.03) brightness(.98); }
+  100% { transform: scale(1.085) translate3d(0, -.55%, 0); filter: saturate(1.02) contrast(1.05) brightness(1.035); }
+}
+
+@keyframes calendarRiverLight {
+  0%, 100% { opacity: .68; }
+  50% { opacity: 1; }
+}
+
+@keyframes calendarAura {
+  0%, 100% { opacity: .52; transform: scale(.94); }
+  50% { opacity: .92; transform: scale(1.06); }
+}
+
+@keyframes calendarCountFloat {
+  0%, 100% { transform: translateY(0) rotate(2deg); }
+  50% { transform: translateY(-.35rem) rotate(1deg); }
+}
+
+@keyframes chapterBackdropDrift {
+  0% { transform: scale(1.035) translate3d(0, 0, 0); }
+  100% { transform: scale(1.07) translate3d(0, -.45%, 0); }
 }
 
 @keyframes puzzleSnap {
@@ -180,6 +264,11 @@
 @keyframes modalIn {
   from { opacity: 0; transform: translateY(1rem) scale(.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes modalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes toastIn {
