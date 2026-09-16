@@ -95,42 +95,23 @@
   color: #fbeed7;
 }
 
-.opening-portrait {
+.opening-title-visual {
   position: absolute;
-  z-index: 3;
-  top: calc(var(--safe-top) + 5.2rem);
-  left: clamp(1.25rem, 6vw, 2.75rem);
-  width: clamp(6.4rem, 29vw, 9.2rem);
-  padding: .28rem .28rem 1.15rem;
-  border: 1px solid rgba(250, 221, 151, .72);
-  border-radius: 2px;
-  overflow: visible;
-  background: #f1dfb9;
-  box-shadow: .55rem .85rem 1.7rem rgba(28, 2, 4, .46);
-  transform: rotate(-4deg);
-  transform-origin: 50% 100%;
+  z-index: 4;
+  top: calc(var(--safe-top) + 4.7rem);
+  right: 0;
+  left: 0;
+  width: min(86vw, 32rem);
+  margin: 0 auto;
+  line-height: 0;
+  pointer-events: none;
 }
 
-.opening-portrait::after {
-  position: absolute;
-  right: .3rem;
-  bottom: .3rem;
-  left: .3rem;
-  height: .55rem;
-  background: repeating-linear-gradient(90deg, #8a2d24 0 .45rem, transparent .45rem .64rem);
-  content: "ARCHIVE  ·  2026";
-  color: #76231e;
-  font: 650 .34rem/1 var(--font-hei);
-  letter-spacing: .12em;
-  text-align: center;
-}
-
-.opening-portrait img {
+.opening-title-visual img {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  filter: sepia(.2) saturate(.82) contrast(1.04);
+  height: auto;
+  filter: drop-shadow(0 .65rem 1.1rem rgba(28, 2, 4, .42));
 }
 
 .opening-copy {
@@ -144,33 +125,6 @@
   background: linear-gradient(105deg, rgba(45, 3, 6, .9), rgba(52, 4, 7, .63) 72%, transparent);
   box-shadow: -1rem 0 2.5rem rgba(31, 2, 4, .28);
   backdrop-filter: blur(2px);
-}
-
-.opening-title {
-  display: flex;
-  align-items: baseline;
-  gap: .5rem;
-  margin-top: .38rem;
-  color: #fff0bf;
-  font-family: var(--font-hei);
-  font-size: clamp(1.55rem, 7.4vw, 2.7rem);
-  font-weight: 850;
-  letter-spacing: .05em;
-  line-height: 1.06;
-  text-shadow: 0 2px 14px rgba(24, 1, 3, .82), 0 0 20px rgba(214, 157, 42, .2);
-}
-
-.opening-title span {
-  color: #f0ca67;
-  font-size: .58em;
-  font-weight: 700;
-  letter-spacing: .12em;
-  white-space: nowrap;
-}
-
-.opening-title strong {
-  font-weight: 850;
-  white-space: nowrap;
 }
 
 .opening-lead {
@@ -1807,9 +1761,8 @@ img.is-broken {
 
 @media (max-height: 640px) {
   .screen-opening { padding-bottom: calc(var(--safe-bottom) + 1.9rem); }
-  .opening-portrait { top: calc(var(--safe-top) + 4.2rem); width: clamp(5.2rem, 23vw, 6.7rem); }
+  .opening-title-visual { top: calc(var(--safe-top) + 3.8rem); width: min(74vw, 24rem); }
   .opening-copy { margin-bottom: .35rem; padding-block: .62rem; }
-  .opening-title { font-size: clamp(1.3rem, 6.4vw, 2rem); }
   .opening-lead { margin-top: .42rem; font-size: clamp(.69rem, 2.75vw, .82rem); line-height: 1.55; }
   .calendar-flipbook { width: min(44vw, 185px); margin-top: calc(var(--safe-top) + 2.5rem); }
   .stack-hint-row { margin-top: .45rem; }
@@ -1830,7 +1783,7 @@ img.is-broken {
 @media (min-width: 600px) and (pointer: coarse), (min-width: 600px) and (hover: none) {
   .calendar-flipbook { width: min(38vw, 260px); }
   .opening-copy { max-width: 560px; }
-  .opening-portrait { width: 9.4rem; }
+  .opening-title-visual { width: min(68vw, 36rem); }
   .opening-lead { font-size: 1.05rem; }
   .spending-chart { height: min(43vh, 26rem); }
   .puzzle-stage { width: min(46vw, 390px, 44vh); }

@@ -1301,6 +1301,10 @@
           '--scene-background-image',
           'url("' + core.toCssAssetUrl(screen.background) + '")'
         );
+        var titleImage = element.querySelector('[data-scene-title-image]');
+        if (screen.titleImage && titleImage) {
+          titleImage.src = screen.titleImage;
+        }
       }
     });
   }

@@ -59,8 +59,8 @@
   animation: monumentLight 6.5s ease-in-out infinite;
 }
 
-.screen-opening.is-active .opening-portrait img {
-  animation: archivePhotoBreathe 7s ease-in-out infinite alternate;
+.screen-opening.is-active .opening-title-visual img {
+  animation: openingTitleGlow 4.8s ease-in-out infinite;
 }
 
 .screen-calendars.is-active::before {
@@ -178,9 +178,9 @@
   50% { opacity: 1; }
 }
 
-@keyframes archivePhotoBreathe {
-  0% { transform: scale(1); filter: sepia(.2) saturate(.82) contrast(1.04); }
-  100% { transform: scale(1.035); filter: sepia(.16) saturate(.94) contrast(1.06); }
+@keyframes openingTitleGlow {
+  0%, 100% { filter: drop-shadow(0 .65rem 1.1rem rgba(28, 2, 4, .42)) brightness(.98); }
+  50% { filter: drop-shadow(0 .8rem 1.45rem rgba(255, 196, 77, .28)) brightness(1.08); }
 }
 
 @keyframes calendarRiverDrift {

@@ -145,14 +145,20 @@
     }
 
     if (id === 's1') {
-      gsap.fromTo(screen.querySelector('.opening-title'), {
-        letterSpacing: '.14em'
+      gsap.fromTo(screen.querySelector('.opening-title-visual img'), {
+        autoAlpha: 0,
+        y: -18,
+        scale: .9,
+        filter: 'brightness(1.3) blur(4px)'
       }, {
-        letterSpacing: '.05em',
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        filter: 'brightness(1) blur(0px)',
         duration: 1.15,
         delay: .18,
-        ease: 'power2.out',
-        clearProps: 'letterSpacing'
+        ease: 'back.out(1.08)',
+        clearProps: 'opacity,visibility,transform,filter'
       });
     }
 

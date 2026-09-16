@@ -19,6 +19,7 @@
       chapter: '打开时间',
       eyebrow: '一份献给时间的礼物',
       title: '40本台历 见证变迁',
+      titleImage: 'assets/images/scenes/s1-title-mark.png',
       background: 'assets/images/scenes/s1-time-monument.webp',
       lead: '2026年9月28日，巴中市平昌县元山镇元山社区85岁老党员陈治国，将自己连续记录了40年的40本台历，郑重捐给县档案馆，为共和国生日献上了一份特殊的礼物。'
     },

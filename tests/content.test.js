@@ -19,6 +19,7 @@ test('第一、二屏使用同一红金时间叙事的独立背景', () => {
   const s2 = content.screens.find((screen) => screen.id === 's2');
 
   assert.equal(s1.background, 'assets/images/scenes/s1-time-monument.webp');
+  assert.equal(s1.titleImage, 'assets/images/scenes/s1-title-mark.png');
   assert.equal(s2.background, 'assets/images/scenes/s2-calendar-river-years.webp');
   assert.notEqual(s1.background, s2.background);
 });

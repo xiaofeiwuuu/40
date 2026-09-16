@@ -8,6 +8,9 @@ const assetsRoot = join(projectRoot, 'assets');
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.name === '.git') {
+      return [];
+    }
     const fullPath = join(directory, entry.name);
     return entry.isDirectory() ? walk(fullPath) : [fullPath];
   });
@@ -80,8 +83,9 @@ const puzzleImages = [
   's9-good-life-walk-a.webp',
   's9-good-life-walk-b.webp'
 ].map((name) => join(assetsRoot, 'images', 'scenes', name));
-const generatedSceneBackgrounds = [
+const generatedSceneImages = [
   's1-time-monument.webp',
+  's1-title-mark.png',
   's2-calendar-river-years.webp',
   's3-writing-archive-bg.webp',
   's4-electric-light-bg.webp',
@@ -120,8 +124,8 @@ puzzleImages.forEach((path) => {
   assert(existsSync(path), `screen 9 puzzle image is missing: ${relative(projectRoot, path)}`);
   identifyImage(path, 1600);
 });
-generatedSceneBackgrounds.forEach((path) => {
-  assert(existsSync(path), `generated scene background is missing: ${relative(projectRoot, path)}`);
+generatedSceneImages.forEach((path) => {
+  assert(existsSync(path), `generated scene image is missing: ${relative(projectRoot, path)}`);
   identifyImage(path, 1600);
 });
 quizImages.forEach((path) => {
